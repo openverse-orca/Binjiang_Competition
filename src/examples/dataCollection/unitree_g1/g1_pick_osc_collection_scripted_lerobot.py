@@ -312,7 +312,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--waypoint_files",
-        default=os.path.join(base_dir, "my_waypoint_button", "my_waypoint_button_press.yaml"),
+        default=os.path.join(base_dir, "my_waypoint_button", "marked", "my_waypoint_press_01.yaml"),
         help="带 task 的路点文件分别作为独立 episode；不带 task 的多个文件按顺序在同一集执行",
     )
     parser.add_argument(

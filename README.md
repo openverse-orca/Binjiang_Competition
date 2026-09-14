@@ -18,7 +18,7 @@
 ### 获取代码
 
 ```bash
-git clone <本仓库地址>
+git clone https://github.com/openverse-orca/Binjiang_Competition
 cd Binjiang_Competition
 ```
 
@@ -95,7 +95,7 @@ Task prompt 是描述当前数据所执行任务的自然语言指令，例如 `
 
 采集程序会把 task prompt 写入 LeRobot 数据集：完整文本保存在 `meta/tasks.jsonl`，parquet 中每帧的 `task_index` 指向对应文本。因此 prompt 必须与该帧实际执行的任务一致。
 
-- 宇树 G1 按钮自动化采集从各 `my_waypoint_button*.yaml` 读取 `task`；每个带 `task` 的路点文件单独生成 episode，并在该集开始前写入对应 prompt。已提供按压式（`my_waypoint_button_press.yaml`）、旋转式（`my_waypoint_button_rotate.yaml`）和拨杆式（`my_waypoint_button_toggle.yaml`）三个新任务路点模板，位姿需在新场景就绪后校准；`--num_episodes` 表示每个文件重复采集的集数。
+- 宇树 G1 按钮自动化采集从各 `src/examples/dataCollection/unitree_g1/my_waypoint_button/marked/*.yaml` 读取 `task`；每个带 `task` 的路点文件单独生成 episode，并在该集开始前写入对应 prompt。路点文件由 `g1_pick_waypoint_mark.py` 在实际场景中标注生成（如 `my_waypoint_press_01.yaml`、`my_waypoint_rotate_01.yaml`、`my_waypoint_toggle_01.yaml`）；`--num_episodes` 表示每个文件重复采集的集数。
 - 不带 `task` 的普通路点 YAML，多个文件仍按顺序组成同一个 episode，并使用命令行 `--task` 作为整集 prompt。
 - Pico 遥操作采集使用命令行 `--task`。task prompt 应与本次采集实际执行的任务一致（如 `按按压式按钮`、`旋转旋转式按钮`、`拨动拨杆式按钮`）；同一次脚本启动不要混采不同任务。
 

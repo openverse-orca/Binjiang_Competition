@@ -222,6 +222,11 @@ def main() -> None:
         help="任务语言描述（写入路点 YAML 的 task 字段，未传则留空）",
     )
     parser.add_argument(
+        "--file_stem",
+        default="",
+        help="输出文件名主干（建议英文，如 press/rotate/toggle）；未传时使用 --button_name",
+    )
+    parser.add_argument(
         "--level", type=str, default="default", help="场景的名称（默认 default）"
     )
     parser.add_argument(
@@ -421,7 +426,7 @@ def main() -> None:
         """本轮结束：把已记录的点合并为一个任务路点 YAML。"""
         if not marked_points:
             return None
-        safe_name = args.button_name.strip().replace(" ", "_") or "button"
+        safe_name = (args.file_stem.strip() or args.button_name).strip().replace(" ", "_") or "button"
         doc = {
             "button_name": args.button_name,
             "task": str(args.task).strip(),

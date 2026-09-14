@@ -1,5 +1,5 @@
 button_name: 旋钮
-task: ''
+task: '旋转旋钮'
 gripper_open: -1.0
 gripper_close: 2.0
 segments:

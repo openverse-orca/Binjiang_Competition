@@ -185,7 +185,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
 OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
     --task_config example.yaml \
     --agent_name g1_pick \
-    --waypoint_files my_waypoint_button/my_waypoint_button_press.yaml,my_waypoint_button/my_waypoint_button_rotate.yaml,my_waypoint_button/my_waypoint_button_toggle.yaml \
+    --waypoint_files my_waypoint_button/marked/my_waypoint_press_01.yaml,my_waypoint_button/marked/my_waypoint_toggle_01.yaml \
     --lerobot_out $HOME/binjiang_datasets/g1_osc_buttons \
     --repo_id local/g1_pick_osc_buttons \
     --num_episodes 1 \
@@ -206,32 +206,32 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
     --track_clamp 0.08
 ```
 
-三个新任务路点文件分别定义一条按钮轨迹，每个文件都在 YAML 顶层声明自己的 `button_type` 和 `task`：
+当前 `my_waypoint_button/marked/` 下的路点文件由「路点标注」工具（见下文）在实际场景中标注生成，每个文件都在 YAML 顶层声明自己的 `button_name` 和 `task`：
 
 | 路点文件 | 按钮类型 | 写入的 task prompt |
 |----------|----------|--------------------|
-| `my_waypoint_button_press.yaml` | 按压式 | `按按压式按钮` |
-| `my_waypoint_button_rotate.yaml` | 旋转式 | `旋转旋转式按钮` |
-| `my_waypoint_button_toggle.yaml` | 拨杆式 | `拨动拨杆式按钮` |
+| `my_waypoint_press_01.yaml` | 按压式 | `按压停止按钮` |
+| `my_waypoint_rotate_01.yaml` | 旋转式 | 留空（标注时未传 `--task`），补填后才能与带 `task` 的文件同用 |
+| `my_waypoint_toggle_01.yaml` | 拨杆式 | `拨动拨杆式按钮` |
 
-各路点的运动结构：
+各按钮任务的运动结构：
 
 - 按压式：接近 → 竖直下压 → 保持 → 撤回（并指夹爪用指尖按压）。
 - 旋转式：接近 → 下移 → 闭合夹爪抓住旋钮 → 保持位置、腕部绕竖直轴旋转 → 松开 → 撤回。
 - 拨杆式：接近 → 贴住拨杆末端 → 沿竖直方向拨动 → 撤回。
 
-带 `task` 的每个路点文件会单独生成 episode，脚本在该集开始前写入对应 prompt。上面的命令设置 `--num_episodes 1`，因此会依次保存按压、旋转、拨杆共 3 个 episode；设置为 `2` 时，每个任务重复 2 集，共保存 6 集。按钮任务不需要再传入 `--task`。相对路径仍以脚本目录为基准，因此必须保留 `my_waypoint_button/` 前缀。
+带 `task` 的每个路点文件会单独生成 episode，脚本在该集开始前写入对应 prompt；同一命令中的路点 YAML 必须全部带 `task` 或全部不带，否则脚本会拒绝启动。上面的命令设置 `--num_episodes 1`，因此会依次保存按压、拨杆共 2 个 episode；设置为 `2` 时，每个任务重复 2 集，共保存 4 集。按钮任务不需要再传入 `--task`。相对路径仍以脚本目录为基准，因此必须保留 `my_waypoint_button/marked/` 前缀。
 
 > [!NOTE]
-> 新任务路点中的位姿为占位估计值。新场景加载后，请先用 `--dry_run` 验证轨迹，再按实际按钮位置校准各段 `r_target_b` / `r_quat_b`（旋转式还需按旋钮行程调整旋转段角度，拨杆式可按需改为向下拨动）。`my_waypoint_button1-4.yaml` 为旧场景四色路点，仅用于链路验证与格式参考。
+> 新场景按钮位置以标注结果为准。标注后可先用 `--dry_run` 验证轨迹；若某段偏差较大，可重新标注或手动微调该段 `r_target_b` / `r_quat_b`（旋转式还需按旋钮行程调整旋转段角度，拨杆式可按需改为向下拨动）。
 
 | 参数 | 含义 | 默认值 | 使用建议 |
 |------|------|--------|----------|
-| `--waypoint_files` | 逗号分隔的路点 YAML | `my_waypoint_button/my_waypoint_button_press.yaml` | 带 `task` 的文件分别生成 episode；全部不带 `task` 时按顺序组成同一集；两种文件不能混用 |
+| `--waypoint_files` | 逗号分隔的路点 YAML | `my_waypoint_button/marked/my_waypoint_press_01.yaml` | 带 `task` 的文件分别生成 episode；全部不带 `task` 时按顺序组成同一集；两种文件不能混用 |
 | `--lerobot_out` | LeRobot 数据集输出目录 | 无；非 dry-run 必须指定 | 每个数据集使用独立目录 |
 | `--repo_id` | 数据集仓库名 | `local/g1_pick_osc_scripted` | 可按任务修改 |
 | `--task` | YAML 未声明 `task` 时使用的语言指令 | `按按钮` | 必须与实际轨迹一致；带 `task` 的按钮 YAML 使用自身的 `task` |
-| `--num_episodes` | 每条轨迹重复采集的 episode 数 | `1` | 三个任务文件的总集数为 `3 × num_episodes` |
+| `--num_episodes` | 每条轨迹重复采集的 episode 数 | `1` | 总集数为 `路点文件数 × num_episodes` |
 | `--fps` | 数据采集帧率 | `20` | 一般保持 20 |
 | `--clock` | `sim` 或 `wall` | `sim` | 脚本化采集推荐 `sim` |
 | `--resume` | 追加到已有数据集 | 未启用 | 续采时追加 |
@@ -261,6 +261,7 @@ OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
     --task_config example.yaml \
     --agent_name g1_pick \
     --button_name 拨杆1 \
+    --file_stem toggle \
     --out_dir my_waypoint_button/marked \
     --default_steps 300 \
     --joint_strip on \
@@ -271,8 +272,9 @@ OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
 
 | 参数 | 含义 | 默认值 |
 |------|------|--------|
-| `--button_name` | 本次操作的按钮名称（写入路点 YAML 与文件名） | 必填 |
+| `--button_name` | 本次操作的按钮名称（写入路点 YAML 的 `button_name` 字段） | 必填 |
 | `--task` | 任务语言描述（写入路点 YAML 的 `task` 字段） | 留空 |
+| `--file_stem` | 输出文件名主干（建议英文，如 `press`/`rotate`/`toggle`） | 未传时使用 `--button_name` |
 | `--out_dir` | 标注结果输出目录 | `my_waypoint_button/marked` |
 | `--default_steps` | 每段写入的默认 `steps` 数 | `300` |
 | `--joint_strip` / `--strip_col` | 任务模型配置 | 与采集脚本保持一致 |
@@ -298,7 +300,7 @@ OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
 5. 张开夹爪 → 按 X（点 5：松开姿态，夹爪张开）
 6. 抬离撤回 → 按 X（点 6：离开姿态）
 
-每次按 X 记录一个点（末端 B 系位姿 + 夹爪 open/close 自动判定），本轮按左 Grip 结束后，所有点合并保存为 `my_waypoint_<按钮名>_<轮次>.yaml`：
+每次按 X 记录一个点（末端 B 系位姿 + 夹爪 open/close 自动判定），本轮按左 Grip 结束后，所有点合并保存为 `my_waypoint_<file_stem>_<轮次>.yaml`（`--file_stem` 未传时使用 `button_name`）：
 
 ```yaml
 button_name: 旋钮1        # 来自 --button_name
@@ -320,14 +322,14 @@ segments:                 # 本轮按 X 记录的全部点，按记录顺序排�
 标注文件可直接传给脚本化采集。任务名优先级：命令行 `--task`（提供时覆盖，仅运行时生效、不修改 YAML 文件）> 路点 YAML 的 `task` > 默认值。带 `task` 的多个路点文件分别作为独立 episode：
 
 ```bash
-# YAML 中已有 task: 旋转旋转式按钮，直接使用
+# YAML 中 task 为空时，用命令行 --task 指定（不改文件）
 python g1_pick_osc_collection_scripted_lerobot.py \
-    --waypoint_files my_waypoint_button/marked/my_waypoint_旋钮1_01.yaml ...
+    --waypoint_files my_waypoint_button/marked/my_waypoint_rotate_01.yaml \
+    --task "旋转旋转式按钮" ...
 
-# 命令行 --task 覆盖 YAML 中的 task（不改文件）
+# YAML 中已写入 task 后可直接使用
 python g1_pick_osc_collection_scripted_lerobot.py \
-    --waypoint_files my_waypoint_button/marked/my_waypoint_旋钮1_01.yaml \
-    --task "旋转旋钮1" ...
+    --waypoint_files my_waypoint_button/marked/my_waypoint_rotate_01.yaml ...
 ```
 
 > [!NOTE]
@@ -418,7 +420,7 @@ data_collection:
 | `src/examples/dataCollection/unitree_g1/g1_pick_osc_collection_scripted_lerobot.py` | 路点插值与脚本化数据采集 |
 | `src/examples/dataCollection/unitree_g1/g1_pick_waypoint_mark.py` | 关键路点标注工具 |
 | `src/examples/dataCollection/unitree_g1/g1_pick_osc_replay_lerobot.py` | LeRobot parquet 数据回放 |
-| `src/examples/dataCollection/unitree_g1/my_waypoint_button/*.yaml` | 按钮任务脚本化路点（`press`/`rotate`/`toggle` 为新任务路点，`1-4` 为旧场景四色路点） |
+| `src/examples/dataCollection/unitree_g1/my_waypoint_button/marked/*.yaml` | 路点标注生成的按钮任务路点 |
 | `src/dataStorage/lerobot_camera.py` | 相机名称、端口和 WebSocket 连接实现 |
 | `src/dataStorage/g1_pick_osc_data_storage.py` | Unitree G1 的 18 维 state/action 定义 |
 

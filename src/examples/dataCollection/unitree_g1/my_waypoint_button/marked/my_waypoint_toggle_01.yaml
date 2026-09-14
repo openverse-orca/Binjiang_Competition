@@ -1,4 +1,4 @@
-button_name: 拨杆1
+button_name: 拨杆
 task: '拨动拨杆式按钮'
 gripper_open: -1.0
 gripper_close: 2.0

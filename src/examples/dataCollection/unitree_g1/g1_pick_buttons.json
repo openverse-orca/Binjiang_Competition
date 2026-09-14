@@ -2,15 +2,15 @@
     "version": "3.0",
     "viewport_camera_transform": {
         "position": [
-            12.332963943481445,
-            14.264171600341797,
-            1.2403279542922974
+            12.278301239013672,
+            14.311370849609375,
+            1.1787668466567993
         ],
         "rotation": [
-            0.8312624818239756,
-            -0.07534866893639891,
-            -0.049718127404185915,
-            0.5485010229787898
+            0.8162506121427476,
+            -0.10102745765241383,
+            -0.06986678304989714,
+            0.5644882847350668
         ]
     },
     "actors": [
@@ -81,46 +81,6 @@
                                         {
                                             "name": "switch",
                                             "index": 1
-                                        }
-                                    ],
-                                    "group_overrids": [
-                                        {
-                                            "type_id": "{22B10178-39B6-4C12-BB37-77DB45FDD3B6}",
-                                            "type_index": 0,
-                                            "property_overrides": [
-                                                {
-                                                    "name": "translate.x",
-                                                    "value": 0.0,
-                                                    "type": "float"
-                                                },
-                                                {
-                                                    "name": "translate.y",
-                                                    "value": -0.019771099090576172,
-                                                    "type": "float"
-                                                },
-                                                {
-                                                    "name": "translate.z",
-                                                    "value": 0.0,
-                                                    "type": "float"
-                                                },
-                                                {
-                                                    "name": "rotate.x",
-                                                    "value": 0.0,
-                                                    "type": "float"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "entity_path": [
-                                        {
-                                            "name": "DistributionBox_03_Switch",
-                                            "index": 0
-                                        },
-                                        {
-                                            "name": "switch",
-                                            "index": 1
                                         },
                                         {
                                             "name": "phy",
@@ -267,7 +227,7 @@
                                             "property_overrides": [
                                                 {
                                                     "name": "solimp.x",
-                                                    "value": 0.9900000095367432,
+                                                    "value": 0.9990000128746033,
                                                     "type": "float"
                                                 },
                                                 {
@@ -332,7 +292,7 @@
                                             "property_overrides": [
                                                 {
                                                     "name": "solref.x",
-                                                    "value": 0.0010000000474974513,
+                                                    "value": 9.999999747378752e-05,
                                                     "type": "float"
                                                 }
                                             ]
@@ -398,7 +358,7 @@
                                             "property_overrides": [
                                                 {
                                                     "name": "solref.x",
-                                                    "value": 0.0010000000474974513,
+                                                    "value": 9.999999747378752e-05,
                                                     "type": "float"
                                                 }
                                             ]
@@ -431,27 +391,6 @@
             },
             "asset_path": "assets/cae3c6559556dd4f/default_project/prefabs/g1_pick_usda",
             "entity_overrides": [
-                {
-                    "entity_path": [],
-                    "group_overrids": [
-                        {
-                            "type_id": "{22B10178-39B6-4C12-BB37-77DB45FDD3B6}",
-                            "type_index": 0,
-                            "property_overrides": [
-                                {
-                                    "name": "translate.x",
-                                    "value": 12.11705493927002,
-                                    "type": "float"
-                                },
-                                {
-                                    "name": "translate.y",
-                                    "value": 14.412960052490234,
-                                    "type": "float"
-                                }
-                            ]
-                        }
-                    ]
-                },
                 {
                     "entity_path": [
                         {
