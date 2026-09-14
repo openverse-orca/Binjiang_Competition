@@ -65,6 +65,9 @@ localhost:50051
 
 ## 运行准备
 
+> [!IMPORTANT]
+> OrcaLab 版本建议低于 26.8.1。高于该版本涉及相机接口变动，如需使用请自行参考 [OrcaGym 文档](https://openverse-orca.github.io/OrcaGym/)。
+
 请先按仓库根目录 [README](../README.md) 完成环境安装，并确认已在 OrcaLab 资产库中订阅 `Binjiang_Competition_2026` 与 `g1_pick`。
 
 后续命令均在运行 OrcaLab 的主机上执行：
