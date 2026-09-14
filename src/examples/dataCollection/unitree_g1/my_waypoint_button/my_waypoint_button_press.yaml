@@ -1,0 +1,37 @@
+# 按压式按钮任务路点。
+# 位姿为占位估计值：新场景加载后请先用 --dry_run 验证轨迹，
+# 再按实际按钮位置校准 r_target_b（B 系位置）与 r_quat_b（B 系姿态，xyzw）。
+button_type: press
+task: "按按压式按钮"
+
+gripper_open: -1.0
+gripper_close: 2
+
+segments:
+  # 到达按钮上方（接近）
+  - steps: 300
+    l_hold: true
+    r_target_b: [0.25, -0.10, 0.20]
+    r_quat_b: [-0.02, -0.03, 0.05, 0.998]
+    gripper_r: close
+
+  # 竖直下压按钮
+  - steps: 200
+    l_hold: true
+    r_target_b: [0.25, -0.10, 0.12]
+    r_quat_b: [-0.02, -0.03, 0.05, 0.998]
+    gripper_r: close
+
+  # 保持按压，等按钮到位
+  - steps: 150
+    l_hold: true
+    r_target_b: [0.25, -0.10, 0.115]
+    r_quat_b: [-0.02, -0.03, 0.05, 0.998]
+    gripper_r: close
+
+  # 竖直抬离并撤回
+  - steps: 300
+    l_hold: true
+    r_target_b: [0.32, -0.05, 0.24]
+    r_quat_b: [-0.02, -0.03, 0.05, 0.998]
+    gripper_r: close

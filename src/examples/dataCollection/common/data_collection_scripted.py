@@ -31,7 +31,7 @@ log_dir = os.path.join(base_dir, "logs")
 log_file = "data_collection_scripted.log"
 
 orca_logger = get_orca_logger(
-    name="SouthGridScriptedCollection",
+    name="BinjiangScriptedCollection",
     log_file=log_file,
     max_bytes=10 * 1024 * 1024,
     backup_count=5,

@@ -9,7 +9,7 @@ type: "pick_and_place"
 # 数据采集配置
 # agent_joint_prefix: 录制和回放时，仅处理名称匹配该前缀的机器人关节。
 data_collection:
-  agent_joint_prefix: "g1_omnipicker_"
+  agent_joint_prefix: "g1_pick_"
 
 # actor是要动态加载到场景中的物体
 # actor.name是物体在场景中的名字

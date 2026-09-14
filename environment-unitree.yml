@@ -1,4 +1,4 @@
-# SouthGrid 运行环境。请从新环境创建，不要更新已有环境。
+# 物理 AI +电力场景智能机器人sim2real挑战赛 运行环境。请从新环境创建，不要更新已有环境。
 
 name: orcalab_lerobot
 channels:

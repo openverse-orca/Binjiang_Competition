@@ -619,7 +619,7 @@ def encoder_worker_main(
                 cams = list(meta.get("cam_keys", ["prewarm"]))
                 dummy = np.zeros((h, w_, 3), dtype=np.uint8)
                 for ck in cams:
-                    tmp = Path(tempfile.gettempdir()) / f"southgrid_encoder_check_{ck}_{os.getpid()}.mp4"
+                    tmp = Path(tempfile.gettempdir()) / f"binjiang_encoder_check_{ck}_{os.getpid()}.mp4"
                     container = None
                     try:
                         with _NVENC_OPEN_LOCK:
@@ -666,7 +666,7 @@ def encoder_worker_main(
     except Exception as e:
         _log.error("[编码] 编码服务异常退出")
         try:
-            Path("/tmp/southgrid_encoder_error.txt").write_text(str(e))
+            Path("/tmp/binjiang_encoder_error.txt").write_text(str(e))
         except Exception:
             pass
         try:

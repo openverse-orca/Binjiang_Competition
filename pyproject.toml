@@ -3,9 +3,9 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "southgrid"
+name = "binjiang-competition"
 version = "0.1.0"
-description = "SouthGrid manipulation examples for OrcaGym"
+description = "物理 AI +电力场景智能机器人sim2real挑战赛 manipulation examples for OrcaGym"
 requires-python = ">=3.12,<3.13"
 dependencies = ["orca-gym==26.7.3"]
 

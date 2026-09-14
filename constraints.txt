@@ -1,4 +1,4 @@
-# Validated transitive versions for the SouthGrid runtime.
+# Validated transitive versions for the competition runtime.
 # This file is an input to lock generation; installations use requirements.txt.
 
 absl-py==2.4.0

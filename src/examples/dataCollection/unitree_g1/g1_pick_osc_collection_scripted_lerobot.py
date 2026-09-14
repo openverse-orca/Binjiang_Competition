@@ -124,7 +124,8 @@ def _build_episode_template(
 ) -> dict:
     g_open = waypoint_group[0][1]
     g_close = waypoint_group[0][2]
-    task_prompt = waypoint_group[0][4] or default_task
+    # 优先级：命令行 --task（显式提供时覆盖，不修改 YAML）> 路点 YAML 的 task > 默认
+    task_prompt = default_task or waypoint_group[0][4] or "按按钮"
     pairs: list[tuple[dict, str]] = []
 
     for path, f_open, f_close, segments, _ in waypoint_group:
@@ -311,7 +312,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--waypoint_files",
-        default=os.path.join(base_dir, "waypoint_tool", "my_waypoint_tool1.yaml"),
+        default=os.path.join(base_dir, "my_waypoint_button", "my_waypoint_button_press.yaml"),
         help="带 task 的路点文件分别作为独立 episode；不带 task 的多个文件按顺序在同一集执行",
     )
     parser.add_argument(
@@ -326,8 +327,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--task",
-        default="整理工具",
-        help="路点 YAML 未提供 task 时使用的任务语言描述",
+        default=None,
+        help="任务语言描述；提供时覆盖路点 YAML 中的 task（仅运行时生效，不修改 YAML 文件），未提供时使用 YAML 中的 task",
     )
     parser.add_argument(
         "--num_episodes",

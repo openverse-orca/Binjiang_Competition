@@ -33,7 +33,6 @@ from dataStorage.lerobot_camera import (
 )
 from dataStorage.openloong_data_storage import OpenLoongDataStorage
 from dataStorage.tiangong_data_storage import Tiangong2DataStorage
-from dataStorage.g1_omnipicker_data_storage import G1OmniPickerDataStorage
 
 if TYPE_CHECKING:
     from orca_gym.environment.orca_gym_local_env import OrcaGymLocalEnv
@@ -279,7 +278,7 @@ class StreamingNvencEncoder:
         h, w = int(height), int(width)
         dummy = np.zeros((h, w, 3), dtype=np.uint8)
         for cam_key in cam_keys:
-            tmp = Path(tempfile.gettempdir()) / f"southgrid_encoder_check_{cam_key}_{os.getpid()}.mp4"
+            tmp = Path(tempfile.gettempdir()) / f"binjiang_encoder_check_{cam_key}_{os.getpid()}.mp4"
             worker = None
             try:
                 worker = _CameraEncodeWorker(tmp, self._fps, w, h)
@@ -969,75 +968,6 @@ class LeRobotSimSyncMixin:
                 _log.info(
                     f"[LeRobot][相机] {env_name} 帧同步正常"
                 )
-
-
-# ---------------------------------------------------------------------------
-# G1 OmniPicker 具体子类（18 维 state）
-# ---------------------------------------------------------------------------
-
-_G1_OMNIPICKER_STATE_NAMES = [
-    "l_pos_x", "l_pos_y", "l_pos_z",
-    "l_quat_x", "l_quat_y", "l_quat_z", "l_quat_w",
-    "r_pos_x", "r_pos_y", "r_pos_z",
-    "r_quat_x", "r_quat_y", "r_quat_z", "r_quat_w",
-    "l_grip_inner_norm", "l_grip_outer_norm",
-    "r_grip_inner_norm", "r_grip_outer_norm",
-]
-
-
-class G1OmniPickerLeRobotStorage(LeRobotSimSyncMixin, G1OmniPickerDataStorage):
-    """G1 OmniPicker 的 LeRobot 格式 storage（18 维 state）。
-
-    state (18 维)：
-        [l_pos(3), l_quat_xyzw(4), r_pos(3), r_quat_xyzw(4),
-         l_grip_inner_norm(1), l_grip_outer_norm(1),
-         r_grip_inner_norm(1), r_grip_outer_norm(1)]
-
-    夹爪归一化：每个 actuator 按各自 actuator_ranges 的 (min, max) 线性映射到 [0, 1]。
-    G1 默认 ranges = (-1.0, 2.0)，即 norm = (val + 1.0) / 3.0。
-
-    底盘 /action/drive/ctrl 不写入 LeRobot 数据集（仅用于遥操作时移动机器人）。
-    """
-
-    def __init__(self, dataset_path: str) -> None:
-        super().__init__(dataset_path=dataset_path, hdf5_path=None)
-
-        from conf import g1_omnipicker_conf
-        n_l = len(g1_omnipicker_conf.gripper_l["actuator_names"])
-        n_r = len(g1_omnipicker_conf.gripper_r["actuator_names"])
-        l_ranges = g1_omnipicker_conf.gripper_l["actuator_ranges"][:n_l]
-        r_ranges = g1_omnipicker_conf.gripper_r["actuator_ranges"][:n_r]
-        self._l_grip_min = np.array([r[0] for r in l_ranges], dtype=np.float32)
-        self._l_grip_max = np.array([r[1] for r in l_ranges], dtype=np.float32)
-        self._r_grip_min = np.array([r[0] for r in r_ranges], dtype=np.float32)
-        self._r_grip_max = np.array([r[1] for r in r_ranges], dtype=np.float32)
-        self._n_l = n_l
-        self._n_r = n_r
-
-    @property
-    def state_dim(self) -> int:
-        return 18
-
-    @property
-    def state_names(self) -> list[str]:
-        return _G1_OMNIPICKER_STATE_NAMES
-
-    def build_state(self, obs: dict) -> np.ndarray:
-        """从 obs 组装 18 维 state，夹爪按各自量程归一化到 [0, 1]。"""
-        pos = np.asarray(obs["/action/end/position"], dtype=np.float32)    # (2, 3)
-        quat = np.asarray(obs["/action/end/orientation"], dtype=np.float32)  # (2, 4)
-        motor = np.asarray(obs["/action/effector/motor"], dtype=np.float32).flatten()
-        l_motor = motor[:self._n_l]
-        r_motor = motor[self._n_l:self._n_l + self._n_r]
-        l_range = self._l_grip_max - self._l_grip_min
-        r_range = self._r_grip_max - self._r_grip_min
-        l_norm = np.clip((l_motor - self._l_grip_min) / np.where(l_range > 0, l_range, 1.0), 0.0, 1.0)
-        r_norm = np.clip((r_motor - self._r_grip_min) / np.where(r_range > 0, r_range, 1.0), 0.0, 1.0)
-        return np.concatenate([
-            pos[0], quat[0],
-            pos[1], quat[1],
-            l_norm, r_norm,
-        ]).astype(np.float32)
 
 
 # ---------------------------------------------------------------------------

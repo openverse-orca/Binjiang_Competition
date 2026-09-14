@@ -1,1 +1,1 @@
-"""Shared utilities for SouthGrid manipulation examples."""
+"""Shared utilities for manipulation examples."""

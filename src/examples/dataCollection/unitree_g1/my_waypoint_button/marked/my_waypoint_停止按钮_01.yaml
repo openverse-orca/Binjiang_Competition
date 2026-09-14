@@ -1,0 +1,77 @@
+button_name: 停止按钮
+task: '按压停止按钮'
+gripper_open: -1.0
+gripper_close: 2.0
+segments:
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.223
+  - -0.1616
+  - 0.1425
+  r_quat_b:
+  - -0.0943
+  - 0.0241
+  - 0.0893
+  - 0.9912
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.2237
+  - 0.0912
+  - 0.2089
+  r_quat_b:
+  - 0.0139
+  - -0.0594
+  - 0.4041
+  - 0.9127
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3025
+  - 0.0935
+  - 0.2843
+  r_quat_b:
+  - -0.0645
+  - -0.0654
+  - 0.1279
+  - 0.9875
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3547
+  - 0.0878
+  - 0.2747
+  r_quat_b:
+  - -0.1664
+  - -0.0953
+  - 0.1311
+  - 0.9727
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3014
+  - 0.0715
+  - 0.2484
+  r_quat_b:
+  - -0.1295
+  - -0.1113
+  - 0.2218
+  - 0.96
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.2592
+  - -0.1784
+  - 0.1213
+  r_quat_b:
+  - -0.3042
+  - -0.0306
+  - 0.0994
+  - 0.9469
+  gripper_r: open

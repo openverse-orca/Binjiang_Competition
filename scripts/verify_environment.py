@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-fast verification for the pinned SouthGrid delivery runtime."""
+"""Fail-fast verification for the pinned competition delivery runtime."""
 
 from __future__ import annotations
 

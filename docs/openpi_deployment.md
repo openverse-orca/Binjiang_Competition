@@ -1,6 +1,6 @@
 # OpenPI 部署指南
 
-本文档面向需要基于本仓库采集数据、训练策略并部署推理服务的工程师。本仓库（SouthGrid）负责机器人数据采集与在线推理客户端，策略训练与推理服务由 [Physical Intelligence openpi](https://github.com/Physical-Intelligence/openpi) 框架承担。下文命令如无另行说明，均在运行训练或推理服务的那台机器上执行。
+本文档面向需要基于本仓库采集数据、训练策略并部署推理服务的工程师。本仓库负责机器人数据采集与在线推理客户端，策略训练与推理服务由 [Physical Intelligence openpi](https://github.com/Physical-Intelligence/openpi) 框架承担。下文命令如无另行说明，均在运行训练或推理服务的那台机器上执行。
 
 **如需启用 RTC 异步推理**（降低策略执行延迟），请在完成本文档主线流程后，参阅第 [9. RTC 异步推理（可选）](#9-rtc-异步推理可选) 节。
 
@@ -9,7 +9,7 @@
 ## 主线部署流程
 
 ```
-SouthGrid                    openpi（独立环境）
+本仓库                       openpi（独立环境）
 ─────────────────                   ──────────────────────
 数据采集（LeRobot v2.1）
         │ HF_LEROBOT_HOME/<dataset>

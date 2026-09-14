@@ -66,7 +66,7 @@ class SceneManager:
         '''
         @description: 读取数据采集时需要记录和恢复的关节名称前缀。
         @return:
-            前缀字符串（如 "g1_omnipicker_"）；未配置时返回 None，表示不过滤
+            前缀字符串（如 "g1_pick_osc_"）；未配置时返回 None，表示不过滤
         '''
         return self._config.get("data_collection", {}).get("agent_joint_prefix")
 

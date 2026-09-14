@@ -128,27 +128,50 @@ def bake_dropped_bodies(xml: str, mj, md, drop: set) -> tuple[str, list[str]]:
 
 
 # ---------------------------------------------------------------------------
-# 电柜按钮的行程约束
+# 配电箱按钮的行程约束（滨江场景 DistributionBox 按压式按钮）
 # ---------------------------------------------------------------------------
-_BUTTON_JOINT_TOKENS = ("ElectricalCabinet_Button", "ElectricalCabinet_button")
+_BUTTON_JOINT_TOKENS = ("DistributionBox",)
+
+# 个别按钮的行程上限覆盖（米），未命中则使用 range_max
+_BUTTON_RANGE_OVERRIDES = {
+    "initiate_button": 0.002,
+    "stop_button": 0.002,
+}
 
 
-def clamp_button_joints(xml: str, range_max: float = 0.01) -> tuple[str, list[str]]:
-    """为电柜按钮设置行程及约束求解参数。
+def clamp_button_joints(xml: str, range_max: float = 0.005) -> tuple[str, list[str]]:
+    """为配电箱按压式按钮（slide 关节）设置行程及约束求解参数。
 
-    range_max 的单位为米；solreflimit 和 solimplimit 用于保持按钮运动范围稳定。
+    仅匹配 DistributionBox 下的 slide 关节（旋钮/拨杆的 hinge 不受影响）。
+    range_max 的单位为米，行程为对称区间 [-range_max, range_max]，
+    防止按钮沿滑轴弹出；solreflimit 和 solimplimit 用于保持按钮运动范围稳定。
+    无弹簧无阻尼的按钮会补充与同类按钮一致的回弹与阻尼参数。
     """
     if not _BUTTON_JOINT_TOKENS or range_max <= 0:
         return xml, []
+
+    clamped: list[str] = []
 
     def _repl(m):
         a = _attrs(m.group(2))
         name = a.get("name", "")
         if not any(tok in name for tok in _BUTTON_JOINT_TOKENS):
             return m.group(0)
-        a["range"] = f"0 {range_max}"
+        if a.get("type", "").lower() != "slide":
+            return m.group(0)
+        r = next((v for tok, v in _BUTTON_RANGE_OVERRIDES.items() if tok in name), range_max)
+        a["range"] = f"{-r} {r}"
         a["solreflimit"] = "0.001 1"
         a["solimplimit"] = "0.001 0.001 0.001"
+        try:
+            no_spring = float(a.get("stiffness", "0") or 0) == 0
+            no_damp = float(a.get("damping", "0") or 0) == 0
+        except ValueError:
+            no_spring = no_damp = False
+        if no_spring:
+            a["stiffness"] = "0.0099999998"
+        if no_damp:
+            a["damping"] = "0.0049999999"
         parts = [m.group(1)]
         order = ["name", "type", "axis", "range", "solreflimit", "solimplimit"] + [
             k for k in a if k not in ("name", "type", "axis", "range",
@@ -157,13 +180,10 @@ def clamp_button_joints(xml: str, range_max: float = 0.01) -> tuple[str, list[st
         for k in order:
             parts.append(f' {k}="{a[k]}"')
         parts.append(m.group(3))
+        clamped.append(name)
         return "".join(parts)
 
     new_xml, n = re.subn(r"(<joint\b)((?:\s+[\w:.-]+\s*=\s*\"[^\"]*\")*)\s*(/?>)", _repl, xml)
-    clamped = []
-    for m in re.finditer(r'<joint\b[^>]*\bname="([^"]+)"', new_xml):
-        if any(tok in m.group(1) for tok in _BUTTON_JOINT_TOKENS):
-            clamped.append(m.group(1))
     return new_xml, clamped
 
 
@@ -480,7 +500,7 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
                 log("[MODEL] 参考姿态已应用")
 
             new_xml, rep = strip_xml(xml, drop)
-            new_xml, clamped_btns = clamp_button_joints(new_xml, range_max=0.001)
+            new_xml, clamped_btns = clamp_button_joints(new_xml, range_max=0.005)
             if clamped_btns:
                 log(f"[MODEL] 已配置 {len(clamped_btns)} 个按钮行程约束")
             import pathlib

@@ -1,4 +1,4 @@
-<mujoco model="g1_pick_southgrid">
+<mujoco model="g1_pick">
   <compiler angle="radian" meshdir="assets" autolimits="true" />
 
   <option impratio="1.0" cone="pyramidal" jacobian="auto" iterations="100" tolerance="1e-08" ls_iterations="20" ls_tolerance="0.01" gravity="0 0 -9.81" />

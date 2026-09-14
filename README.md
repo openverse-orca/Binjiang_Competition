@@ -1,13 +1,12 @@
-# SouthGrid 南方电网大赛
+# 物理 AI +电力场景智能机器人sim2real挑战赛
 
-SouthGrid 为南方电网竞赛场景提供人形机器人数据采集、数据回放与在线推理工具。
+本项目为“物理 AI +电力场景智能机器人sim2real挑战赛”竞赛场景提供人形机器人数据采集与数据回放工具。
 
 | 平台 | 交付功能 | 使用说明 |
 | --- | --- | --- |
-| 智元 G1 OmniPicker | 四色按钮与工具整理的数据采集、回放和在线推理 | [数据采集](docs/g1_omnipicker_collection.md) · [在线推理](docs/g1_omnipicker_inference.md) |
-| 宇树 G1 | 工具抓取数据采集 | [数据采集](docs/unitree_g1_collection.md) |
+| 宇树 G1 | 按钮任务数据采集 | [数据采集](docs/unitree_g1_collection.md) |
 
-如需基于采集数据训练策略或部署智元 G1 OmniPicker 在线推理服务，请阅读 [策略服务部署](docs/openpi_deployment.md)。
+如需基于采集数据训练策略或部署在线推理服务，请阅读 [策略服务部署](docs/openpi_deployment.md)。
 
 ## 开始前准备
 
@@ -19,8 +18,8 @@ SouthGrid 为南方电网竞赛场景提供人形机器人数据采集、数据�
 ### 获取代码
 
 ```bash
-git clone https://github.com/openverse-orca/SouthGrid.git
-cd SouthGrid
+git clone <本仓库地址>
+cd Binjiang_Competition
 ```
 
 ## 安装运行环境
@@ -51,8 +50,7 @@ orcalab
 > [!IMPORTANT]
 > 首次运行任务前，必须在 OrcaLab 资产库中订阅以下资产：
 >
-> - `SouthGrid_Competition_2026`
-> - `g1_omnipicker`
+> - `Binjiang_Competition_2026`
 > - `g1_pick`
 
 资产订阅流程：
@@ -76,7 +74,7 @@ sudo apt install adb
 
 完成环境安装和资产订阅后，按以下顺序运行任务：
 
-1. 根据目标平台选择[智元 G1 OmniPicker 数据采集](docs/g1_omnipicker_collection.md)、[智元 G1 OmniPicker 在线推理](docs/g1_omnipicker_inference.md)或[宇树 G1 数据采集](docs/unitree_g1_collection.md)。
+1. 根据目标平台选择[宇树 G1 数据采集](docs/unitree_g1_collection.md)。
 2. 在 OrcaLab 中加载平台文档指定的任务布局。
 3. 按平台文档检查相机配置；使用 Pico 遥操作时，同时完成设备连接和端口映射。
 4. 在 OrcaLab 中启动仿真。
@@ -93,19 +91,18 @@ sudo apt install adb
 
 ## Task prompt（任务指令）
 
-Task prompt 是描述当前数据所执行任务的自然语言指令，例如 `按红色按钮` 或 `整理工具`。它与 `--task_config` 不同：`--task_config` 指向场景配置 YAML，task prompt 则用于训练和推理时的语言条件。
+Task prompt 是描述当前数据所执行任务的自然语言指令，例如 `按按压式按钮`、`旋转旋转式按钮` 或 `拨动拨杆式按钮`。它与 `--task_config` 不同：`--task_config` 指向场景配置 YAML，task prompt 则用于训练和推理时的语言条件。
 
 采集程序会把 task prompt 写入 LeRobot 数据集：完整文本保存在 `meta/tasks.jsonl`，parquet 中每帧的 `task_index` 指向对应文本。因此 prompt 必须与该帧实际执行的任务一致。
 
-- 智元 G1 OmniPicker 四色按钮自动化采集从 `pose_g1_button_candidates.yaml` 读取各颜色的 `task`，每个 episode 自动写入对应颜色的 prompt。
-- 宇树 G1 按钮自动化采集从各 `my_waypoint_button*.yaml` 读取 `task`；每个带 `task` 的路点文件单独生成 episode，并在该集开始前写入对应 prompt。一次传入多个按钮文件可在同一数据集中采集多种颜色，`--num_episodes` 表示每个文件重复采集的集数。
-- 宇树 G1 工具等普通路点 YAML 不提供 `task`，多个文件仍按顺序组成同一个 episode，并使用命令行 `--task` 作为整集 prompt。
-- 两个机器人的 Pico 遥操作采集都使用命令行 `--task`。按钮任务应根据本次采集颜色填写 `按红色按钮`、`按绿色按钮`、`按黄色按钮` 或 `按蓝色按钮`；同一次脚本启动不要混采不同颜色。
+- 宇树 G1 按钮自动化采集从各 `my_waypoint_button*.yaml` 读取 `task`；每个带 `task` 的路点文件单独生成 episode，并在该集开始前写入对应 prompt。已提供按压式（`my_waypoint_button_press.yaml`）、旋转式（`my_waypoint_button_rotate.yaml`）和拨杆式（`my_waypoint_button_toggle.yaml`）三个新任务路点模板，位姿需在新场景就绪后校准；`--num_episodes` 表示每个文件重复采集的集数。
+- 不带 `task` 的普通路点 YAML，多个文件仍按顺序组成同一个 episode，并使用命令行 `--task` 作为整集 prompt。
+- Pico 遥操作采集使用命令行 `--task`。task prompt 应与本次采集实际执行的任务一致（如 `按按压式按钮`、`旋转旋转式按钮`、`拨动拨杆式按钮`）；同一次脚本启动不要混采不同任务。
 
 示例：
 
 ```text
---task "按红色按钮"
+--task "按按压式按钮"
 ```
 
 ## 数据输出
@@ -115,7 +112,7 @@ Task prompt 是描述当前数据所执行任务的自然语言指令，例如 `
 ## 目录概览
 
 ```text
-SouthGrid/
+Binjiang_Competition/
 ├── docs/                    # 平台使用与部署说明
 ├── scripts/                 # 环境安装与检查脚本
 ├── src/examples/

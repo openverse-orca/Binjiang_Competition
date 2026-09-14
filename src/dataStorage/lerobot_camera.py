@@ -27,20 +27,6 @@ WRIST_L_CAMERA = {
 DEFAULT_HW = (480, 640)
 
 
-def omnipicker_camera_map(*, enable_wrist_l: bool = False) -> dict:
-    """返回 OmniPicker 相机映射。
-
-    默认启用头部 7090 和右腕 7080；``enable_wrist_l=True`` 时增加左腕 7070。
-    """
-    if not enable_wrist_l:
-        return dict(DEFAULT_CAMERA_MAP)
-    return {
-        "camera_head_color": DEFAULT_CAMERA_MAP["camera_head_color"],
-        **WRIST_L_CAMERA,
-        "camera_wrist_r_color": DEFAULT_CAMERA_MAP["camera_wrist_r_color"],
-    }
-
-
 def camera_keys(camera_map: dict) -> list[str]:
     """返回 LeRobot 相机键列表（写入数据集 features 时用）。"""
     return [key for (key, _port) in camera_map.values()]

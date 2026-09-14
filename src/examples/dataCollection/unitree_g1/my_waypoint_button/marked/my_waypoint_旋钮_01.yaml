@@ -1,0 +1,101 @@
+button_name: 旋钮
+task: ''
+gripper_open: -1.0
+gripper_close: 2.0
+segments:
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3051
+  - -0.1581
+  - 0.0668
+  r_quat_b:
+  - 0.0229
+  - -0.0482
+  - 0.0288
+  - 0.9982
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.2958
+  - 0.1103
+  - 0.3753
+  r_quat_b:
+  - -0.0272
+  - -0.0689
+  - 0.0461
+  - 0.9962
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3462
+  - 0.097
+  - 0.3721
+  r_quat_b:
+  - -0.0494
+  - -0.0252
+  - 0.1018
+  - 0.9933
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3468
+  - 0.102
+  - 0.3643
+  r_quat_b:
+  - -0.0595
+  - -0.0222
+  - 0.0881
+  - 0.9941
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.3556
+  - 0.0757
+  - 0.3429
+  r_quat_b:
+  - -0.643
+  - -0.2732
+  - 0.1269
+  - 0.7041
+  gripper_r: close
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.337
+  - 0.0825
+  - 0.3401
+  r_quat_b:
+  - -0.6636
+  - -0.3375
+  - 0.0763
+  - 0.6633
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.2588
+  - 0.035
+  - 0.2546
+  r_quat_b:
+  - -0.6471
+  - -0.3077
+  - 0.0321
+  - 0.6968
+  gripper_r: open
+- steps: 300
+  l_hold: true
+  r_target_b:
+  - 0.2715
+  - -0.2187
+  - 0.0478
+  r_quat_b:
+  - 0.614
+  - 0.1253
+  - 0.0289
+  - -0.7787
+  gripper_r: open
