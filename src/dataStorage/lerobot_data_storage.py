@@ -29,7 +29,6 @@ import cv2
 from dataStorage.lerobot_camera import (
     camera_keys,
     capture_frame_with_idx,
-    iter_frames_from_mp4,
 )
 from dataStorage.openloong_data_storage import OpenLoongDataStorage
 from dataStorage.tiangong_data_storage import Tiangong2DataStorage
@@ -770,15 +769,11 @@ class LeRobotSimSyncMixin:
         writer: LeRobotDatasetWriter,
         task: str = "robot manipulation",
         clock: str = "sim",
-        camera_source: str = "websocket",
     ) -> None:
         if clock not in ("sim", "wall"):
             raise ValueError(f"clock 只能是 'sim' 或 'wall'，收到: {clock!r}")
-        if camera_source not in ("websocket", "mp4"):
-            raise ValueError(f"camera_source 只能是 'websocket' 或 'mp4'，收到: {camera_source!r}")
         self._lr_fps = float(fps)
         self._lr_clock = clock
-        self._lr_camera_source = camera_source
         self._lr_cameras = cameras
         self._lr_camera_map = camera_map
         self._lr_target_hw = target_hw
@@ -814,22 +809,12 @@ class LeRobotSimSyncMixin:
         return self._lr_count
 
     def collection_data(self, obs: dict, env: "OrcaGymLocalEnv", **kwargs) -> None:
-        """时钟门控流式写帧（websocket）或仅记录 state/时间戳（mp4）。"""
+        """时钟门控流式写帧。"""
         t = time.perf_counter() if self._lr_clock == "wall" else float(env.data.time)
         if self._lr_next_cap is None:
             self._lr_next_cap = t
 
         if t + 1e-9 < self._lr_next_cap:
-            return
-
-        if self._lr_camera_source == "mp4":
-            state_cur = self.build_state(obs)
-            wall_t = time.perf_counter()
-            if self._lr_ep_start_wall is None:
-                self._lr_ep_start_wall = wall_t
-            self._lr_states.append((state_cur, wall_t))
-            self._lr_count += 1
-            self._lr_next_cap += 1.0 / self._lr_fps
             return
 
         state_cur = self.build_state(obs)
@@ -859,12 +844,8 @@ class LeRobotSimSyncMixin:
         self._lr_count += 1
         self._lr_next_cap += 1.0 / self._lr_fps
 
-    def save_data(self, episode_video_dir: str | None = None, ep_start_wall: float | None = None, **kwargs) -> None:
+    def save_data(self, **kwargs) -> None:
         """提交本集数据到后台 worker（不阻塞主线程）。"""
-        if self._lr_camera_source == "mp4":
-            self._save_data_mp4(episode_video_dir, ep_start_wall)
-            return
-
         if self._lr_count < 2:
             _log.warning(
                 f"[LeRobot] 帧数不足（门控次数={self._lr_count}），丢弃本集"
@@ -878,48 +859,6 @@ class LeRobotSimSyncMixin:
         written = self._lr_count - 1
         _log.info(
             f"[LeRobot] ✓ 提交 {written} 帧（流式落盘），Episode {ep_idx} 后台处理中"
-        )
-        self._reset_episode()
-
-    def _save_data_mp4(self, episode_video_dir: str | None, ep_start_wall: float | None) -> None:
-        if episode_video_dir is None:
-            _log.error("[LeRobot] mp4 模式 save_data 必须传 episode_video_dir，丢弃本集")
-            self._lr_writer.discard_episode()
-            self._reset_episode()
-            return
-
-        N = len(self._lr_states)
-        if N < 2:
-            _log.warning(f"[LeRobot] mp4 模式帧数不足（{N} 条 state 记录），丢弃本集")
-            self._lr_writer.discard_episode()
-            self._reset_episode()
-            return
-
-        states = [s for s, _ in self._lr_states]
-        wall_ts = [t for _, t in self._lr_states]
-        ep_start = ep_start_wall if ep_start_wall is not None else (
-            self._lr_ep_start_wall if self._lr_ep_start_wall is not None else wall_ts[0]
-        )
-
-        _log.info(f"[LeRobot] mp4 模式：从 {episode_video_dir} 逐帧提取 {N} 帧（生成器模式）...")
-        cams = camera_keys(self._lr_camera_map)
-        frame_gen = iter_frames_from_mp4(
-            episode_video_dir, self._lr_camera_map, wall_ts, ep_start, self._lr_target_hw
-        )
-        for i, images in enumerate(frame_gen):
-            if i >= N - 1:
-                break
-            frame: dict = {
-                "observation.state": states[i].astype(np.float32),
-                "action": self.build_action(states[i], states[i + 1]).astype(np.float32),
-            }
-            for cam_key in cams:
-                frame[f"observation.images.{cam_key}"] = images[cam_key]
-            self._lr_writer.stream_frame(frame, self._lr_task)
-
-        ep_idx = self._lr_writer.flush_episode()
-        _log.info(
-            f"[LeRobot] ✓ 提交 {N - 1} 帧（MP4 批量提取），Episode {ep_idx} 后台处理中"
         )
         self._reset_episode()
 
@@ -943,8 +882,6 @@ class LeRobotSimSyncMixin:
         self._lr_count: int = 0
         self._lr_next_cap: float | None = None
         self._lr_cam_start_idx: dict | None = None
-        self._lr_states: list = []
-        self._lr_ep_start_wall: float | None = None
 
     def _log_cam_alignment(self) -> None:
         if not self._lr_cameras or self._lr_cam_start_idx is None or self._lr_prev is None:

@@ -66,7 +66,7 @@ localhost:50051
 ## 运行准备
 
 > [!IMPORTANT]
-> OrcaLab 版本建议低于 26.8.1。高于该版本涉及相机接口变动，如需使用请自行参考 [OrcaGym 文档](https://openverse-orca.github.io/OrcaGym/)。
+> 要求 OrcaLab 版本大于等于 26.8.2。本项目的相机链路已适配 26.8.2 的相机接口（`start_streaming` 串流、12 字节 WebSocket 帧头），更低版本的相机接口不兼容。
 
 请先按仓库根目录 [README](../README.md) 完成环境安装，并确认已在 OrcaLab 资产库中订阅 `Binjiang_Competition_2026` 与 `g1_pick`。
 
@@ -110,7 +110,6 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
     --fps 20 \
     --clock wall \
     --cameras head,wrist_r \
-    --camera_source websocket \
     --dls_lambda 0.2 \
     --joint_strip on \
     --strip_col off \
@@ -134,7 +133,6 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
 | `--resume` | 追加到已有数据集 | 未启用 | 断点续采时追加 |
 | `--cameras` | 启用的相机，可选 `head`、`wrist_r` | `head,wrist_r` | 默认使用两路相机 |
 | `--cam_resolution` | 数据帧目标分辨率，高×宽 | `480x640` | 需要缩放时修改 |
-| `--camera_source` | `websocket` 流式采集或 `mp4` 集末提取 | `websocket` | 推荐 `websocket` |
 | `--dls_lambda` | OSC 阻尼最小二乘最大系数 | `0.23` | 示例使用 `0.2` |
 | `--joint_strip` | 任务模型配置 | `off` | 采集示例必须显式使用 `on` |
 | `--strip_col` | 任务模型的碰撞配置 | `off` | `off` 使用采集碰撞配置，`keep` 保留完整配置 |
@@ -195,7 +193,6 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
     --fps 20 \
     --clock sim \
     --cameras head,wrist_r \
-    --camera_source websocket \
     --joint_strip on \
     --strip_col off \
     --time_step 0.001 \

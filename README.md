@@ -25,7 +25,7 @@ cd Binjiang_Competition
 ## 安装运行环境
 
 > [!IMPORTANT]
-> OrcaLab 版本建议低于 26.8.1。高于该版本涉及相机接口变动，如需使用请自行参考 [OrcaGym 文档](https://openverse-orca.github.io/OrcaGym/)。
+> 要求 OrcaLab 版本大于等于 26.8.2。本项目的相机链路已适配 26.8.2 的相机接口，更低版本的相机接口不兼容。
 
 请在新建的 Conda 环境中执行安装：
 

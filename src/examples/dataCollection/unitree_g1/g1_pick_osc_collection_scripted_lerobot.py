@@ -51,6 +51,7 @@ from dataStorage.lerobot_camera import (
     bring_up_cameras,
     close_cameras,
     probe_camera_hw,
+    resolve_registered_cameras,
 )
 from dataStorage.lerobot_data_storage import LeRobotDatasetWriter
 from devices.abstract_device import AbstractDevice
@@ -59,7 +60,6 @@ from scene.scene_manager import SceneManager
 from task.abstract_task import EmptyTask
 
 ENTRY_POINT = "envs.dataCollection.dataCollection_env:DataCollectionEnv"
-STREAM_TRIGGER_PATH = "/tmp/g1_pick_osc_lerobot_stream"
 _L_INIT_JOINT_VALUES = [0.0, 0.127, 0.0, 1.5708, 0.0, 0.0, 0.0]
 
 log_dir = os.path.join(base_dir, "logs")
@@ -361,12 +361,6 @@ def main() -> None:
         "--cam_resolution",
         default="480x640",
         help="采集帧 resize 目标分辨率 HxW（默认 480x640）。",
-    )
-    parser.add_argument(
-        "--camera_source",
-        choices=("websocket", "mp4"),
-        default="websocket",
-        help="相机数据来源。websocket（默认）：内存流流式写盘；mp4：集末从服务端 MP4 提取帧。",
     )
     parser.add_argument(
         "--track_log_every",
@@ -869,20 +863,32 @@ def main() -> None:
                 "[场景] 机器人已就绪，正在连接相机...",
                 flush=True,
             )
-            if args.camera_source == "websocket":
-                os.makedirs(STREAM_TRIGGER_PATH, exist_ok=True)
-                env.begin_save_video(STREAM_TRIGGER_PATH)
-                video_started = True
-                orca_logger.info("相机数据流已启动")
-                cameras = bring_up_cameras(camera_map)
-                camera_map = {n: v for n, v in camera_map.items() if n in cameras}
-                if cameras:
-                    cam_hw = probe_camera_hw(
-                        cameras, camera_map, default_hw=cam_hw_override
-                    )
-            else:
-                orca_logger.info(
-                    "MP4 相机模式已启用"
+            # orcagym 26.8+：begin_save_video 已废弃，改用 start_streaming 开启相机推流；
+            # 后端注册名带 uuid 后缀，先枚举注册相机再按角色关键词解析
+            _resolved, _registered = resolve_registered_cameras(env, camera_map)
+            if _registered:
+                orca_logger.info(f"后端已注册相机: {_registered}")
+            for _cam_name, (_cam_key, _cam_port) in camera_map.items():
+                env.start_streaming(_resolved[_cam_name], capture_rgb=True, color_port=_cam_port)
+            video_started = True
+            orca_logger.info("相机数据流已启动")
+
+            # orcagym 26.8+：引擎仅在 render() 调用时编码推流，等待首帧期间
+            # 主动触发渲染；首次请求 IDR 关键帧，让晚连接的解码器立即同步
+            _render_tick_state = {"idr": True}
+
+            def _render_tick():
+                if _render_tick_state["idr"]:
+                    _render_tick_state["idr"] = False
+                    env.render(request_idr=True)
+                else:
+                    env.render()
+
+            cameras = bring_up_cameras(camera_map, render_fn=_render_tick)
+            camera_map = {n: v for n, v in camera_map.items() if n in cameras}
+            if cameras:
+                cam_hw = probe_camera_hw(
+                    cameras, camera_map, default_hw=cam_hw_override
                 )
     except KeyboardInterrupt:
         orca_logger.info("初始化阶段收到 Ctrl+C，正在释放相机推流会话...")
@@ -892,7 +898,7 @@ def main() -> None:
     def _release_and_close():
         if video_started:
             try:
-                env.stop_save_video()
+                env.get_recorder_manager().stop_all()
             except Exception:
                 orca_logger.warning("相机数据流停止时遇到错误")
         close_cameras(cameras)
@@ -910,7 +916,7 @@ def main() -> None:
         orca_logger.error("控制器未创建成功，退出")
         _release_and_close()
         return
-    if not dry_run and not cameras and args.camera_source != "mp4":
+    if not dry_run and not cameras:
         orca_logger.error("没有可用相机，退出（只想验证动作请加 --dry_run）")
         _release_and_close()
         return
@@ -950,7 +956,6 @@ def main() -> None:
                 writer=writer,
                 task=episode_plan[0]["task"],
                 clock=args.clock,
-                camera_source=args.camera_source,
             )
 
         orca_logger.info(
@@ -988,19 +993,6 @@ def main() -> None:
                 break
             env.set_default_joint_values(default_joint_values)
 
-            ep_dir: str | None = None
-            ep_start_wall: float | None = None
-            if not dry_run and args.camera_source == "mp4":
-                ep_dir = os.path.join(
-                    scratch_dir,
-                    "mp4",
-                    f"ep_{writer.num_episodes + 1:06d}",
-                )
-                os.makedirs(os.path.join(ep_dir, "video"), exist_ok=True)
-                ep_start_wall = time.perf_counter()
-                env.begin_save_video(ep_dir)
-                video_started = True
-
             _, _, r_pos, r_quat, _, r_gm = scripted.build_segmented_trajectory(
                 env,
                 g1_pick_osc_conf,
@@ -1029,13 +1021,6 @@ def main() -> None:
             manager.run_episode()
             ep_dur = time.perf_counter() - ep_t0
 
-            if not dry_run and args.camera_source == "mp4" and video_started:
-                try:
-                    env.stop_save_video()
-                except Exception as stop_err:
-                    raise RuntimeError("相机数据流停止失败") from stop_err
-                video_started = False
-
             if manager._shutdown_requested or not device.finished:
                 if not dry_run:
                     _discard_pending_episode()
@@ -1056,8 +1041,6 @@ def main() -> None:
                 task_info=manager.task.get_task_info(),
                 scene_info=scene_manager.get_scene_info(),
                 task_description=manager.task.get_task_description(),
-                episode_video_dir=ep_dir,
-                ep_start_wall=ep_start_wall,
             )
             committed = writer.num_episodes - committed_before
             if committed <= 0:

@@ -1,12 +1,11 @@
 """Camera helpers for LeRobot data collection.
 
 OrcaStudio streams configured cameras over WebSocket. This module provides camera
-maps, live-frame capture, resolution detection, and timestamp-aligned MP4 frame
-iteration. A camera map has the form
+maps, live-frame capture, and resolution detection. A camera map has the form
 ``{environment_camera_name: (dataset_key, port), ...}``.
 """
+import io
 import logging
-import os
 import socket
 import time
 
@@ -35,6 +34,70 @@ def camera_keys(camera_map: dict) -> list[str]:
 # ---------------------------------------------------------------------------
 # 鲁棒相机启动（TCP 端口探测 + WebSocket 连接 + 首帧等待 + 线程重启）
 # ---------------------------------------------------------------------------
+
+def _annexb_at(data: bytes, off: int) -> bool:
+    """data[off:] 是否以 Annex-B 起始码（00 00 01 / 00 00 00 01）开头。"""
+    if off + 3 > len(data):
+        return False
+    if data[off] == 0 and data[off + 1] == 0 and data[off + 2] == 1:
+        return True
+    return off + 4 <= len(data) and data[off:off + 4] == b"\x00\x00\x00\x01"
+
+
+def _strip_ws_header(data: bytes) -> bytes:
+    """剥掉 WebSocket 帧头，返回 Annex-B NAL 数据。
+
+    orcagym 26.8+ 帧格式为 [8B 时间戳][4B simulate_index][NAL]（12 字节头），
+    旧版为 8 字节头。按 Annex-B 起始码位置自动识别，优先按新版 12 字节处理。
+    """
+    if _annexb_at(data, 12):
+        return data[12:]
+    if _annexb_at(data, 8):
+        return data[8:]
+    return data[12:]
+
+
+_WS_CAMERA_CLS = None
+
+
+def _ws_camera_cls():
+    """构造适配新版 WebSocket 帧头的 CameraWrapper 子类（懒加载并缓存）。"""
+    global _WS_CAMERA_CLS
+    if _WS_CAMERA_CLS is None:
+        import av
+        import websockets
+        from orca_gym.sensor.rgbd_camera import CameraWrapper  # type: ignore[import]
+
+        class _WsCameraWrapper(CameraWrapper):
+            """按帧头长度自适应的相机拉流（逻辑与父类一致，仅剥头不同）。"""
+
+            async def do_stuff(self):
+                uri = f"ws://localhost:{self.port}"
+                async with websockets.connect(uri) as websocket:
+                    cur_pos = 0
+                    rawData = io.BytesIO()
+                    container = None
+                    while self.running:
+                        data = await websocket.recv()
+                        data = _strip_ws_header(data)
+                        rawData.write(data)
+                        rawData.seek(cur_pos)
+                        if cur_pos == 0:
+                            container = av.open(rawData, mode='r')
+                        for packet in container.demux():
+                            if packet.size == 0:
+                                continue
+                            frames = packet.decode()
+                            for frame in frames:
+                                self.image = frame.to_ndarray(format='bgr24')
+                                self.image_index += 1
+                                if self.received_first_frame == False:
+                                    self.received_first_frame = True
+                        cur_pos += len(data)
+
+        _WS_CAMERA_CLS = _WsCameraWrapper
+    return _WS_CAMERA_CLS
+
 
 def wait_ports_open(
     camera_map: dict,
@@ -82,6 +145,7 @@ def bring_up_cameras(
     camera_map: dict,
     port_timeout: float = 30.0,
     frame_timeout: float = 30.0,
+    render_fn=None,
 ) -> dict:
     """稳健地拉起相机推流：端口就绪探测 → 连接 → 等首帧（线程退出则重启）。
 
@@ -92,11 +156,14 @@ def bring_up_cameras(
         camera_map: {env_name: (lerobot_key, port)}。
         port_timeout: 等待端口就绪的最长秒数（默认 30s）。
         frame_timeout: 等待首帧到达的最长秒数（默认 30s）。
+        render_fn: 等待首帧期间反复调用的回调（无参数）。orcagym 26.8+ 的
+            引擎只在 render() 调用时编码推流相机帧，采集循环尚未启动的
+            初始化阶段必须主动触发渲染，否则永远收不到首帧。
 
     Returns:
         {env_name: CameraWrapper}，仅包含已收到首帧的相机。
     """
-    from orca_gym.sensor.rgbd_camera import CameraWrapper  # type: ignore[import]
+    CamCls = _ws_camera_cls()
 
     ready = wait_ports_open(camera_map, timeout=port_timeout)
     if not ready:
@@ -104,7 +171,7 @@ def bring_up_cameras(
 
     cameras: dict = {}
     for name, port in ready.items():
-        cam = CameraWrapper(name=name, port=port)
+        cam = CamCls(name=name, port=port)
         cam.start()
         cameras[name] = cam
         print(f"  ✓ 相机 {name} 已连接（端口 {port}）", flush=True)
@@ -118,6 +185,11 @@ def bring_up_cameras(
         if not pending:
             print("[相机] ✓ 所有相机首帧已就绪", flush=True)
             return cameras
+        if render_fn is not None:
+            try:
+                render_fn()
+            except Exception:
+                pass
         for name in pending:
             thread = getattr(cameras[name], "thread", None)
             if (thread is None or not thread.is_alive()) and restarts[name] < max_restart:
@@ -126,7 +198,7 @@ def bring_up_cameras(
                     "相机 %s 后台线程已退出，重启（第 %d/%d 次）",
                     name, restarts[name], max_restart,
                 )
-                cam = CameraWrapper(name=name, port=ready[name])
+                cam = CamCls(name=name, port=ready[name])
                 cam.start()
                 cameras[name] = cam
         print(f"  等待首帧: {pending}", flush=True)
@@ -189,6 +261,46 @@ def probe_camera_hw(cameras: dict, camera_map: dict, default_hw: tuple = DEFAULT
     return default_hw
 
 
+# 相机角色关键词：逻辑名片段 → 注册名需包含的 token（按优先级降序尝试）。
+# orcagym 26.8+ 后端注册名带 uuid 后缀，不能直接使用逻辑名。
+_ROLE_TOKENS = {
+    "head": ("head_cam", "head"),
+    "wrist_r": ("camera_right", "right"),
+    "wrist_l": ("camera_left", "left"),
+}
+
+
+def resolve_registered_cameras(env, camera_map: dict) -> tuple[dict, list[str]]:
+    """把 camera_map 的逻辑相机名解析为后端注册名（含 uuid 后缀）。
+
+    通过 env.get_camera_names() 枚举后端已注册相机，按角色关键词匹配。
+    返回 (resolved, registered)：resolved 是 {逻辑名: 注册名}，
+    registered 是后端注册名列表（查询失败时为空）。
+    匹配不到的逻辑名保留原名，由后续 start_streaming 给出明确报错。
+    """
+    try:
+        registered = list(env.get_camera_names())
+    except Exception:
+        registered = []
+    resolved: dict[str, str] = {}
+    for logical in camera_map:
+        if not registered or logical in registered:
+            resolved[logical] = logical
+            continue
+        role = next((r for r in _ROLE_TOKENS if r in logical), None)
+        cands: list[str] = []
+        if role:
+            for tok in _ROLE_TOKENS[role]:
+                cands = [r for r in registered if tok in r]
+                if cands:
+                    break
+        else:
+            cands = [r for r in registered if logical in r]
+        # 多个候选时取最短（主实体名短于派生 body 相机名）
+        resolved[logical] = min(cands, key=len) if cands else logical
+    return resolved, registered
+
+
 def setup_cameras(camera_map: dict) -> dict:
     """启动已配置的 WebSocket 相机流。"""
     from orca_gym.sensor.rgbd_camera import CameraWrapper  # type: ignore[import]
@@ -225,153 +337,3 @@ def close_cameras(cameras: dict) -> None:
         thread = getattr(cam, "thread", None)
         if thread is not None and thread.is_alive():
             thread.join(timeout=2.0)
-
-
-# ---------------------------------------------------------------------------
-# MP4 帧提取（备用路径：端口不可用时使用；通过 --camera_source mp4 启用）
-# ---------------------------------------------------------------------------
-
-def extract_frames_from_mp4(
-    episode_video_dir: str,
-    camera_map: dict,
-    wall_timestamps_s: list,
-    ep_start_wall_s: float,
-    target_hw: tuple,
-) -> list[dict]:
-    """从服务端录制的 MP4 按墙钟时间戳逐帧提取 RGB 图像。
-
-    OrcaStudio 在 {episode_video_dir}/video/{cam_name}.mp4 录制各路视频。
-    对于每个状态采集时刻 wall_timestamps_s[i]，计算自 ep_start_wall_s 的偏移量，
-    对应到视频帧索引并读取，resize 到 target_hw。
-
-    Args:
-        episode_video_dir: env.begin_save_video() 传入的目录（含 video/ 子目录）。
-        camera_map: {env_name: (lerobot_key, _port)}。
-        wall_timestamps_s: 每帧状态对应的 time.perf_counter() 时刻（秒）。
-        ep_start_wall_s: 调用 env.begin_save_video() 时的 time.perf_counter()（秒）。
-        target_hw: (H, W) 目标分辨率，用 INTER_AREA 缩放。
-
-    Returns:
-        与 wall_timestamps_s 等长的 list，每项是 {lerobot_key: (H,W,3) uint8 ndarray}。
-        如果某路相机 MP4 缺失，该路的图像填充为全零黑帧（不抛异常）。
-    """
-    H, W = target_hw
-    video_subdir = os.path.join(episode_video_dir, "video")
-
-    captures: dict[str, tuple] = {}
-    for env_name, (key, _port) in camera_map.items():
-        mp4_path = os.path.join(video_subdir, f"{env_name}.mp4")
-        if not os.path.exists(mp4_path):
-            print(f"[相机] {env_name} 视频不可用，使用占位图像；本集不可用于视觉评估", flush=True)
-            continue
-        cap = cv2.VideoCapture(mp4_path)
-        if not cap.isOpened():
-            print(f"[相机] {env_name} 视频无法读取，使用占位图像；本集不可用于视觉评估", flush=True)
-            continue
-        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-        total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        captures[env_name] = (key, cap, total, fps)
-
-    try:
-        results = []
-        for wall_t in wall_timestamps_s:
-            elapsed = max(0.0, wall_t - ep_start_wall_s)
-            images: dict = {}
-            for env_name, (key, cap, total, fps) in captures.items():
-                frame_idx = min(int(elapsed * fps), total - 1)
-                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-                ret, frame = cap.read()
-                if ret and frame is not None:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    if frame.shape[0] != H or frame.shape[1] != W:
-                        frame = cv2.resize(frame, (W, H), interpolation=cv2.INTER_AREA)
-                    images[key] = np.ascontiguousarray(frame, dtype=np.uint8)
-                else:
-                    images[key] = np.zeros((H, W, 3), dtype=np.uint8)
-            for env_name, (key, _port) in camera_map.items():
-                if env_name not in captures and key not in images:
-                    images[key] = np.zeros((H, W, 3), dtype=np.uint8)
-            results.append(images)
-        return results
-    finally:
-        for _, (_, cap, _, _) in captures.items():
-            cap.release()
-
-
-def iter_frames_from_mp4(
-    episode_video_dir: str,
-    camera_map: dict,
-    wall_timestamps_s: list,
-    ep_start_wall_s: float,
-    target_hw: tuple,
-):
-    """逐帧生成按时间戳对齐的 MP4 图像。
-
-    每次生成一个 ``{lerobot_key: (H,W,3) uint8 ndarray}`` 映射。
-
-    消费示例::
-
-        for i, images in enumerate(iter_frames_from_mp4(...)):
-            process(images)
-    """
-    H, W = target_hw
-    video_subdir = os.path.join(episode_video_dir, "video")
-
-    captures: dict[str, tuple] = {}
-    for env_name, (key, _port) in camera_map.items():
-        mp4_path = os.path.join(video_subdir, f"{env_name}.mp4")
-        if not os.path.exists(mp4_path):
-            print(f"[相机] {env_name} 视频不可用，使用占位图像；本集不可用于视觉评估", flush=True)
-            continue
-        cap = cv2.VideoCapture(mp4_path)
-        if not cap.isOpened():
-            print(f"[相机] {env_name} 视频无法读取，使用占位图像；本集不可用于视觉评估", flush=True)
-            continue
-        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-        total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        captures[env_name] = (key, cap, total, fps)
-
-    try:
-        for wall_t in wall_timestamps_s:
-            elapsed = max(0.0, wall_t - ep_start_wall_s)
-            images: dict = {}
-            for env_name, (key, cap, total, fps) in captures.items():
-                frame_idx = min(int(elapsed * fps), total - 1)
-                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-                ret, frame = cap.read()
-                if ret and frame is not None:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    if frame.shape[0] != H or frame.shape[1] != W:
-                        frame = cv2.resize(frame, (W, H), interpolation=cv2.INTER_AREA)
-                    images[key] = np.ascontiguousarray(frame, dtype=np.uint8)
-                else:
-                    images[key] = np.zeros((H, W, 3), dtype=np.uint8)
-            for env_name, (key, _port) in camera_map.items():
-                if env_name not in captures and key not in images:
-                    images[key] = np.zeros((H, W, 3), dtype=np.uint8)
-            yield images
-    finally:
-        for _, (_, cap, _, _) in captures.items():
-            cap.release()
-
-
-def probe_mp4_hw(episode_video_dir: str, camera_map: dict, default_hw: tuple = DEFAULT_HW) -> tuple:
-    """返回录制 MP4 的首帧分辨率；视频不可用时返回 ``default_hw``。
-
-    必须在 env.stop_save_video() 之后调用（否则 MP4 尚未写入文件头）。
-    """
-    video_subdir = os.path.join(episode_video_dir, "video")
-    for env_name in camera_map:
-        mp4_path = os.path.join(video_subdir, f"{env_name}.mp4")
-        if not os.path.exists(mp4_path):
-            continue
-        cap = cv2.VideoCapture(mp4_path)
-        if not cap.isOpened():
-            cap.release()
-            continue
-        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        cap.release()
-        if h > 0 and w > 0:
-            return (h, w)
-    return default_hw

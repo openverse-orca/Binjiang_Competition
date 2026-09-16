@@ -542,16 +542,17 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
 
     h._orig_ule = getattr(gym, "update_local_env", None)
     if h._orig_ule is not None:
+        # 兼容不同版本 orcagym 的调用签名（如 26.8.2 新增 contacts 参数），透传其余参数
         if h.class_level:
-            async def _padded_update_local_env(_self, qpos, time_):
-                if h.bridge is not None:
-                    qpos = h.bridge.pad(qpos)
-                return await h._orig_ule(_self, qpos, time_)
+            async def _padded_update_local_env(_self, *args, **kwargs):
+                if h.bridge is not None and args:
+                    args = (h.bridge.pad(args[0]),) + args[1:]
+                return await h._orig_ule(_self, *args, **kwargs)
         else:
-            async def _padded_update_local_env(qpos, time_):
-                if h.bridge is not None:
-                    qpos = h.bridge.pad(qpos)
-                return await h._orig_ule(qpos, time_)
+            async def _padded_update_local_env(*args, **kwargs):
+                if h.bridge is not None and args:
+                    args = (h.bridge.pad(args[0]),) + args[1:]
+                return await h._orig_ule(*args, **kwargs)
 
         gym.update_local_env = _padded_update_local_env
 
