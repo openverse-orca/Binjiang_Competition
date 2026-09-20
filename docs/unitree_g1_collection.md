@@ -9,10 +9,11 @@
 ### 加载场景
 
 1. 请在运行本项目的主机上启动 OrcaLab。
-2. 请在 OrcaLab 的加载布局对话框中选择任务对应的布局文件：
+2. 请在 OrcaLab 中打开比赛场景 `Binjiang_Competition_2026`。
+3. 请在 OrcaLab 的加载布局对话框中选择任务对应的布局文件：
    - 按钮场景：`src/examples/dataCollection/unitree_g1/g1_pick_buttons.json`
-3. 请确认宇树 G1 与场景物体已正确加载。
-4. 请确认 `src/examples/dataCollection/unitree_g1/example.yaml` 中的 `level_name` 与 OrcaLab 场景名称一致，默认值为 `"example"`。
+4. 请确认宇树 G1 与场景物体已正确加载。
+5. 请确认 `src/examples/dataCollection/unitree_g1/example.yaml` 中的 `level_name` 与 OrcaLab 场景名称一致，默认值为 `"example"`。
 
 按钮布局中保存的机器人名称如下：
 
@@ -98,7 +99,7 @@ adb reverse tcp:8001 tcp:8001
 
 ### 启动命令
 
-先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
+先打开场景 `Binjiang_Competition_2026`，再加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
@@ -180,7 +181,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
 
 ### 按钮任务示例
 
-先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
+先打开场景 `Binjiang_Competition_2026`，再加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
@@ -254,7 +255,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
 
 ### 启动命令
 
-先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
+先打开场景 `Binjiang_Competition_2026`，再加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
@@ -321,7 +322,7 @@ segments:                 # 本轮按 X 记录的全部点，按记录顺序排�
 
 `g1_pick_osc_replay_lerobot.py` 从 LeRobot 数据集的 parquet 文件中读取 18 维 action，只驱动右臂 OSC 和右夹爪进行回放。回放不读取数据集视频，也不需要连接相机。
 
-请加载与采集时相同的布局并启动仿真，加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
+请先打开场景 `Binjiang_Competition_2026`，加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_replay_lerobot.py \
@@ -453,7 +454,8 @@ data_collection:
 
 - 已安装仓库要求的运行环境，并激活 `orcalab_lerobot`。
 - 已订阅 `Binjiang_Competition_2026` 与 `g1_pick` 资产。
-- 已加载与任务对应的布局并启动仿真。
+- 已在 OrcaLab 中打开场景 `Binjiang_Competition_2026`，并加载与任务对应的布局。
+- 已启动仿真。
 - 命令中的 `--agent_name` 与布局机器人名称完全一致。
 - `example.yaml` 的 `level_name` 与 OrcaLab 场景名称一致。
 - OrcaGym 服务 `localhost:50051` 已就绪。
