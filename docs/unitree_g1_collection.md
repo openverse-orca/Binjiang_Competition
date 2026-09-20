@@ -98,7 +98,7 @@ adb reverse tcp:8001 tcp:8001
 
 ### 启动命令
 
-请先加载 `g1_pick_buttons.json` 并启动仿真，再执行：
+先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
@@ -180,7 +180,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
 
 ### 按钮任务示例
 
-请先在 OrcaLab 中加载 `g1_pick_buttons.json` 并启动仿真，再执行：
+先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
@@ -254,7 +254,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
 
 ### 启动命令
 
-请先加载任务布局并启动仿真，再执行：
+先加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
@@ -321,7 +321,7 @@ segments:                 # 本轮按 X 记录的全部点，按记录顺序排�
 
 `g1_pick_osc_replay_lerobot.py` 从 LeRobot 数据集的 parquet 文件中读取 18 维 action，只驱动右臂 OSC 和右夹爪进行回放。回放不读取数据集视频，也不需要连接相机。
 
-请加载与采集时相同的布局并启动仿真，再执行：
+请加载与采集时相同的布局并启动仿真，加载 `g1_pick_buttons.json` 布局,且确认是否已在目录 unitree_g1下,选择仿真程序(手动启动)，再执行：
 
 ```bash
 OMP_NUM_THREADS=1 python g1_pick_osc_replay_lerobot.py \
