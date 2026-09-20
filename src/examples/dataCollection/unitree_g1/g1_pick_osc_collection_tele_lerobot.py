@@ -1267,6 +1267,11 @@ def main() -> None:
                 orca_logger.warning("相机数据流停止时遇到错误")
         close_cameras(cameras)
         try:
+            scene_manager.show_ui_message(1, "", showtime=0)
+            env.render()
+        except Exception:
+            orca_logger.warning("界面状态清理未完成")
+        try:
             env.close()
         except Exception:
             pass

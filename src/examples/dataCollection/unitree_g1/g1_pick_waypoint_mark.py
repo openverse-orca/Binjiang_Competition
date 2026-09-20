@@ -591,6 +591,10 @@ def main() -> None:
     finally:
         try:
             scene_manager.show_ui_message(1, "", showtime=0)
+            env.render()
+        except Exception:
+            pass
+        try:
             env.close()
         except Exception:
             pass
