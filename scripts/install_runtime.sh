@@ -24,10 +24,11 @@ PY
 python -m pip install --no-deps --require-hashes -r requirements.txt
 
 # --no-deps keeps pip from replacing the validated Conda NumPy/SciPy builds.
-python -m pip install --no-deps "orca-gym==26.7.3"
+# Camera interface requires orca-gym >= 26.8.2; install the validated release.
+python -m pip install --no-deps "orca-gym==26.8.2"
 
 # OrcaLab and OrcaGym use the same validated release version.
-python -m pip install --no-deps "orca-lab==26.7.3"
+python -m pip install --no-deps "orca-lab==26.8.2"
 
 # Install the source packages shipped with this repository.
 python -m pip install --no-deps --no-build-isolation ./third_party/lerobot

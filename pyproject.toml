@@ -7,7 +7,7 @@ name = "binjiang-competition"
 version = "0.1.0"
 description = "物理 AI +电力场景智能机器人sim2real挑战赛 manipulation examples for OrcaGym"
 requires-python = ">=3.12,<3.13"
-dependencies = ["orca-gym==26.7.3"]
+dependencies = ["orca-gym>=26.8.2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

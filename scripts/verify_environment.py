@@ -14,6 +14,12 @@ def _assert_version(distribution: str, expected: str) -> None:
         raise RuntimeError(f"{distribution}: expected {expected}, got {actual}")
 
 
+def _assert_min_version(distribution: str, minimum: str) -> None:
+    actual = importlib.metadata.version(distribution)
+    if tuple(int(p) for p in actual.split(".")) < tuple(int(p) for p in minimum.split(".")):
+        raise RuntimeError(f"{distribution}: expected >= {minimum}, got {actual}")
+
+
 def _assert_environment_owned(module) -> None:
     module_path = pathlib.Path(module.__file__).resolve()
     environment_root = pathlib.Path(sys.prefix).resolve()
@@ -33,10 +39,8 @@ def main() -> None:
         "scipy-stubs": "1.16.2.0",
         "numpy-typing-compat": "20250818.2.2",
         "optype": "0.13.4",
-        "orca-gym": "26.7.3",
-        "orca-lab": "26.7.3",
         "gymnasium": "1.2.1",
-        "mujoco": "3.7.0",
+        "mujoco": "3.12.0",
         "av": "17.0.1",
         "pyarrow": "24.0.0",
         "opencv-python": "4.13.0.92",
@@ -60,6 +64,10 @@ def main() -> None:
     }
     for distribution, expected in expected_versions.items():
         _assert_version(distribution, expected)
+
+    # OrcaLab 与 OrcaGym 相机接口要求版本 >= 26.8.2。
+    _assert_min_version("orca-gym", "26.8.2")
+    _assert_min_version("orca-lab", "26.8.2")
 
     numpy_distributions = [
         dist
