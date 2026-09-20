@@ -187,7 +187,7 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
     --task_config example.yaml \
     --agent_name g1_pick \
     --waypoint_files my_waypoint_button/marked/my_waypoint_press_01.yaml,my_waypoint_button/marked/my_waypoint_toggle_01.yaml \
-    --lerobot_out $HOME/binjiang_datasets/g1_osc_buttons \
+    --lerobot_out $HOME/binjiang_datasets/g1_osc_scripted \
     --repo_id local/g1_pick_osc_buttons \
     --num_episodes 1 \
     --fps 20 \
@@ -316,26 +316,6 @@ segments:                 # 本轮按 X 记录的全部点，按记录顺序排�
     gripper_r: open
   - ...
 ```
-
-### 用于自动化采集
-
-标注文件可直接传给脚本化采集。任务名优先级：命令行 `--task`（提供时覆盖，仅运行时生效、不修改 YAML 文件）> 路点 YAML 的 `task` > 默认值。带 `task` 的多个路点文件分别作为独立 episode：
-
-```bash
-# YAML 中 task 为空时，用命令行 --task 指定（不改文件）
-python g1_pick_osc_collection_scripted_lerobot.py \
-    --waypoint_files my_waypoint_button/marked/my_waypoint_rotate_01.yaml \
-    --task "旋转旋转式按钮" ...
-
-# YAML 中已写入 task 后可直接使用
-python g1_pick_osc_collection_scripted_lerobot.py \
-    --waypoint_files my_waypoint_button/marked/my_waypoint_rotate_01.yaml ...
-```
-
-> [!NOTE]
-> 每个标注段的 `steps` 默认为 `--default_steps`，请根据该段运动幅度手动调整（如旋转段需要更长时间可增大）。该脚本为独立工具，不影响数据采集主流程。
-
----
 
 ## 数据回放
 
