@@ -12,10 +12,16 @@
 
 ### 系统与硬件
 
-- Ubuntu 22.04 或 24.04、Conda 与 NVIDIA 驱动（570及以上）。
-- 采集视频需要支持 AV1 NVENC 的 NVIDIA  40系及以上 GPU。
+- 操作系统：Windows 11 / Ubuntu 22.04 / Ubuntu 24.04。
+- Python：3.12.13。
+- OrcaLab / OrcaGym：26.8.2 及以上。
+- Conda：建议使用 Miniconda。
+- NVIDIA 驱动：Ubuntu 验证环境要求 570 及以上；Windows 请安装与显卡匹配的最新稳定版 NVIDIA 驱动。
+- 采集视频需要支持 AV1 NVENC 的 NVIDIA 40 系及以上 GPU。
 
 ### 获取代码
+
+Windows 与 Ubuntu 使用相同命令：
 
 ```bash
 git clone https://github.com/openverse-orca/Binjiang_Competition
@@ -26,6 +32,11 @@ cd Binjiang_Competition
 
 > [!IMPORTANT]
 > 要求 OrcaLab 版本大于等于 26.8.2。本项目的相机链路已适配 26.8.2 的相机接口，更低版本的相机接口不兼容。
+>
+> 当前仓库中的 `environment-unitree.yml`、`requirements.txt` 和 `scripts/install_runtime.sh`
+> 主要面向 Ubuntu / Linux x86-64 验证环境。Windows 11 请按照下面的 Windows 原生安装步骤配置。
+
+### Ubuntu 22.04 / 24.04
 
 请在新建的 Conda 环境中执行安装：
 
@@ -41,12 +52,142 @@ bash scripts/install_runtime.sh
 python scripts/verify_environment.py
 ```
 
+正常情况下应输出：
+
+```text
+Environment verification OK
+```
+
+### Windows 11
+
+建议使用 **Anaconda Prompt** 或 **PowerShell**。
+
+#### 1. 检查前置环境
+
+检查 Conda：
+
+```powershell
+conda --version
+```
+
+检查 Git：
+
+```powershell
+git --version
+```
+
+如果尚未安装 Miniconda，请先安装 Windows 版 Miniconda，并确保 `conda` 可以在终端中正常使用。
+
+#### 2. 创建 Conda 环境
+
+Windows 下手动创建与项目对应的 `orcalab_lerobot` 环境：
+
+```powershell
+conda create -n orcalab_lerobot python=3.12.13 pip=26.0.1 -y
+conda activate orcalab_lerobot
+```
+
+安装项目验证版本的 NumPy 与 SciPy：
+
+```powershell
+conda install -c conda-forge numpy=2.2.6 scipy=1.16.2 -y
+```
+
+确认 Python 版本：
+
+```powershell
+python --version
+```
+
+应显示：
+
+```text
+Python 3.12.13
+```
+
+#### 3. 安装 Python 运行依赖
+
+Windows 不直接使用仓库中针对 Linux x86-64 生成的 `requirements.txt` 锁文件，
+而是根据 `requirements.in` 与 `constraints.txt` 解析 Windows 对应依赖：
+
+```powershell
+python -m pip install -r requirements.in -c constraints.txt
+```
+
+安装 OrcaGym 26.8.2：
+
+```powershell
+python -m pip install --no-deps "orca-gym==26.8.2"
+```
+
+安装 OrcaLab 26.8.2：
+
+```powershell
+python -m pip install --no-deps "orca-lab==26.8.2"
+```
+
+安装仓库自带的 LeRobot：
+
+```powershell
+python -m pip install --no-deps --no-build-isolation .\third_party\lerobot
+```
+
+安装 TeleVuer：
+
+```powershell
+python -m pip install --no-deps --no-build-isolation .\third_party\televuer
+```
+
+安装 OpenPI Client：
+
+```powershell
+python -m pip install --no-deps --no-build-isolation .\third_party\openpi-client
+```
+
+#### 4. Windows 环境检查
+
+检查 OrcaLab 与 OrcaGym 版本：
+
+```powershell
+python -c "import importlib.metadata as m; print('OrcaLab:', m.version('orca-lab')); print('OrcaGym:', m.version('orca-gym'))"
+```
+
+应至少显示：
+
+```text
+OrcaLab: 26.8.2
+OrcaGym: 26.8.2
+```
+
+检查主要 Python 运行组件：
+
+```powershell
+python -c "import numpy,scipy,av,cv2,orca_gym,lerobot,televuer,openpi_client; print('Windows runtime imports OK')"
+```
+
+正常情况下输出：
+
+```text
+Windows runtime imports OK
+```
+
+> [!NOTE]
+> 当前 `scripts/verify_environment.py` 包含针对现有 Linux 验证环境的检查，
+> 其中包括 OpenCV `QT5` GUI 检查和 AV1 NVENC 实际编码测试。
+> Windows 原生环境建议先使用上面的版本检查和 import 检查，不要将
+> `verify_environment.py` 是否完全通过作为 Windows 环境安装成功的唯一判断标准。
+
 ## 首次启动与资产订阅
 
-激活运行环境并启动 OrcaLab：
+Windows 与 Ubuntu 均先激活运行环境：
 
 ```bash
 conda activate orcalab_lerobot
+```
+
+然后启动 OrcaLab：
+
+```bash
 orcalab
 ```
 
@@ -67,11 +208,29 @@ orcalab
 
 只有使用 Pico 进行遥操作时才需要完成本节。请先按照 Openverse Orca 官方的 [VR 遥操作与数据采集操作指南](https://github.com/openverse-orca/OrcaDocs/blob/main/%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86%E4%B8%8E%E5%90%88%E6%88%90/VR%E9%81%A5%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97.md) 完成 Pico 应用安装、开发者模式和设备连接。
 
-Pico 遥操作还需要 Android Platform Tools（`adb`）。在 Ubuntu 上可执行：
+Pico 遥操作需要 Android Platform Tools（`adb`）。
+
+### Ubuntu
 
 ```bash
 sudo apt install adb
 ```
+
+### Windows
+
+安装 Android Platform Tools 后，将其目录加入系统 `Path`，然后检查：
+
+```powershell
+adb version
+```
+
+连接 Pico 后：
+
+```powershell
+adb devices
+```
+
+如果设备连接正常，应能在设备列表中看到对应设备序列号。
 
 ## 使用流程
 
@@ -124,5 +283,3 @@ Binjiang_Competition/
 │   └── inference/           # 在线推理入口
 └── third_party/             # 随交付环境安装的运行时组件
 ```
-
-
