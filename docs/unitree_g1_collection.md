@@ -288,7 +288,7 @@ OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
 | 右手柄位姿 | 遥操右臂到目标姿态 |
 | 右手柄 A / B / 扳机 | 张开 / 闭合 / 连续控制右夹爪 |
 | 左手柄 X | **记录当前点**：保存右臂末端 B 系位姿 + 当前夹爪状态 |
-| 左右 Grip 同按 / Ctrl+C | 退出 |
+| Ctrl+C | 退出 |
 
 ### 旋钮任务采点顺序
 
