@@ -51,9 +51,9 @@ python scripts/verify_environment.py
 
 ### Windows 11
 
-Windows 下建议使用 Anaconda Prompt 或 PowerShell。当前仓库中的 `requirements.txt` 为 Linux x86-64 锁定环境，Windows 请使用 `requirements.in` 与 `constraints.txt` 安装运行依赖。
+Windows 下使用 CMD 配置运行环境。当前仓库中的 `requirements.txt` 为 Linux x86-64 锁定环境，Windows 请使用 `requirements.in` 与 `constraints.txt` 安装运行依赖。
 
-```powershell
+```cmd
 conda create -n orcalab_lerobot python=3.12.13 pip=26.0.1 -y
 conda activate orcalab_lerobot
 conda install -c conda-forge numpy=2.2.6 scipy=1.16.2 -y
@@ -65,7 +65,7 @@ python -m pip install --no-deps --no-build-isolation .\third_party\lerobot .\thi
 
 安装完成后启动 OrcaLab：
 
-```powershell
+```cmd
 orcalab
 ```
 
@@ -107,14 +107,13 @@ sudo apt install adb
 
 ### Windows
 
-可通过 [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools?hl=zh-cn) 获取 ADB，也可以直接在 PowerShell 或 CMD 中使用 WinGet 安装：
+请从 [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools?hl=zh-cn) 官网下载 Windows 版本，解压后将 `platform-tools` 目录加入系统 `Path`。
 
-```bash
-winget install -e --id Google.PlatformTools
+配置完成后重新打开 CMD，连接 Pico 并执行：
+
+```cmd
 adb devices
 ```
-
-安装完成后如当前终端无法识别 `adb`，请重新打开 PowerShell 或 CMD 后再执行 `adb devices`。
 
 如果设备连接正常，应能在设备列表中看到对应设备序列号。
 
