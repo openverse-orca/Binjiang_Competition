@@ -480,7 +480,7 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
         if h.class_level and _self is not None:
             h.gym_inst = _self
         try:
-            with open(orig_path, "r") as f:
+            with open(orig_path, "r", encoding="utf-8") as f:
                 xml = f.read()
 
             mj_full = mujoco.MjModel.from_xml_path(orig_path)
