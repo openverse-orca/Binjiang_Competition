@@ -69,7 +69,7 @@ python -m pip install --no-deps --no-build-isolation .\third_party\lerobot .\thi
 orcalab
 ```
 
-如需在 Windows 下使用 Pico 遥操作，请安装 Android Platform Tools，并确保 `adb` 已加入系统 `Path`。
+如需在 Windows 下使用 Pico 遥操作，请安装 [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools?hl=zh-cn)。
 
 ## 首次启动与资产订阅
 
