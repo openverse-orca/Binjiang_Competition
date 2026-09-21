@@ -107,17 +107,14 @@ sudo apt install adb
 
 ### Windows
 
-安装 Android Platform Tools 后，将其目录加入系统 `Path`，然后检查：
+可通过 [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools?hl=zh-cn) 获取 ADB，也可以直接在 PowerShell 或 CMD 中使用 WinGet 安装：
 
-```powershell
-adb version
-```
-
-连接 Pico 后：
-
-```powershell
+```bash
+winget install -e --id Google.PlatformTools
 adb devices
 ```
+
+安装完成后如当前终端无法识别 `adb`，请重新打开 PowerShell 或 CMD 后再执行 `adb devices`。
 
 如果设备连接正常，应能在设备列表中看到对应设备序列号。
 
