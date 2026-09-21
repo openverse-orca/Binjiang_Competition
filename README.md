@@ -59,7 +59,7 @@ conda activate orcalab_lerobot
 conda install -c conda-forge numpy=2.2.6 scipy=1.16.2 -y
 
 python -m pip install -r requirements.in -c constraints.txt
-python -m pip install --no-deps "orca-gym==26.8.2" "orca-lab==26.8.2"
+python -m pip install "orca-gym==26.8.2" "orca-lab==26.8.2"
 python -m pip install --no-deps --no-build-isolation .\third_party\lerobot .\third_party\televuer .\third_party\openpi-client
 ```
 
