@@ -535,7 +535,7 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
             log("[MODEL] 任务模型配置已就绪")
             return patched
         except Exception as exc:
-            log("[MODEL] 任务模型配置不可用，使用默认模型")
+            log(f"[MODEL] 任务模型配置不可用，使用默认模型（原因: {exc!r}）")
             return orig_path
 
     gym.load_model_xml = _patched_load_model_xml
