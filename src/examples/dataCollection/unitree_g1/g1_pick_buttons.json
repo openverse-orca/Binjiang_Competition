@@ -2,15 +2,15 @@
     "version": "3.0",
     "viewport_camera_transform": {
         "position": [
-            12.278301239013672,
-            14.311370849609375,
-            1.1787668466567993
+            13.533036231994629,
+            13.828068733215332,
+            1.4689481258392334
         ],
         "rotation": [
-            0.8162506121427476,
-            -0.10102745765241383,
-            -0.06986678304989714,
-            0.5644882847350668
+            0.807774025211766,
+            -0.12964639354803237,
+            -0.09112972968003921,
+            0.5677924877995595
         ]
     },
     "actors": [
@@ -279,6 +279,35 @@
                                         {
                                             "name": "initiate_button",
                                             "index": 4
+                                        }
+                                    ],
+                                    "group_overrids": [
+                                        {
+                                            "type_id": "{E544201F-83F6-419F-B3DD-1D6559FFDFB0}",
+                                            "type_index": 0,
+                                            "property_overrides": [
+                                                {
+                                                    "name": "stiffness",
+                                                    "value": 0.003000000026077032,
+                                                    "type": "float"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "entity_path": [
+                                        {
+                                            "name": "DistributionBox_02",
+                                            "index": 0
+                                        },
+                                        {
+                                            "name": "DB02_body",
+                                            "index": 0
+                                        },
+                                        {
+                                            "name": "initiate_button",
+                                            "index": 4
                                         },
                                         {
                                             "name": "Entity2",
@@ -326,6 +355,35 @@
                                                 {
                                                     "name": "solref.x",
                                                     "value": 0.0010000000474974513,
+                                                    "type": "float"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "entity_path": [
+                                        {
+                                            "name": "DistributionBox_02",
+                                            "index": 0
+                                        },
+                                        {
+                                            "name": "DB02_body",
+                                            "index": 0
+                                        },
+                                        {
+                                            "name": "stop_button",
+                                            "index": 0
+                                        }
+                                    ],
+                                    "group_overrids": [
+                                        {
+                                            "type_id": "{E544201F-83F6-419F-B3DD-1D6559FFDFB0}",
+                                            "type_index": 0,
+                                            "property_overrides": [
+                                                {
+                                                    "name": "stiffness",
+                                                    "value": 0.003000000026077032,
                                                     "type": "float"
                                                 }
                                             ]
@@ -699,6 +757,16 @@
                     ]
                 }
             ]
+        }
+    ],
+    "package_references": [
+        {
+            "id": "f00cbe2a-3479-4dd6-8038-4899758d9199",
+            "name": "Binjiang_Competition_2026"
+        },
+        {
+            "id": "8f938f37-e756-498c-9818-13bbbcefb8ab",
+            "name": "g1_pick"
         }
     ]
 }
