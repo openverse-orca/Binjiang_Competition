@@ -506,7 +506,7 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
             import pathlib
             orig = pathlib.Path(orig_path)
             patched = str(orig.with_stem(orig.stem + "_jointstrip"))
-            with open(patched, "w") as f:
+            with open(patched, "w", encoding="utf-8") as f:
                 f.write(new_xml)
 
             mj_str = mujoco.MjModel.from_xml_path(patched)
@@ -521,7 +521,7 @@ def install(env, agent_name: str, *, keep=KEEP_DEFAULT, keep_base: bool = False,
             body = head + lines
             for ln in body:
                 log(ln)
-            with open(os.path.join(dump_dir, f"strip_report_{ts}.txt"), "w") as f:
+            with open(os.path.join(dump_dir, f"strip_report_{ts}.txt"), "w", encoding="utf-8") as f:
                 f.write("\n".join(body) + "\n")
 
             if not ok:
