@@ -128,7 +128,7 @@ def bake_dropped_bodies(xml: str, mj, md, drop: set) -> tuple[str, list[str]]:
 
 
 # ---------------------------------------------------------------------------
-# 配电箱按钮的行程约束（滨江场景 DistributionBox 按压式按钮）
+# 配电箱按钮的行程约束（滨江场景 DistributionBox）
 # ---------------------------------------------------------------------------
 _BUTTON_JOINT_TOKENS = ("DistributionBox",)
 
@@ -138,14 +138,23 @@ _BUTTON_RANGE_OVERRIDES = {
     "stop_button": 0.002,
 }
 
+# 拨杆/旋钮（hinge 关节）的旋转限位（度）。拨杆行程 0-90°，
+# 无回弹弹簧；旋钮允许大范围旋转。
+_HINGE_RANGE_OVERRIDES = {
+    "knob_switch": (-180.0, 180.0),
+    "03_switch": (0.0, 90.0),
+}
+_HINGE_RANGE_DEFAULT = (0.0, 90.0)
+
 
 def clamp_button_joints(xml: str, range_max: float = 0.005) -> tuple[str, list[str]]:
-    """为配电箱按压式按钮（slide 关节）设置行程及约束求解参数。
+    """为配电箱交互关节设置行程约束。
 
-    仅匹配 DistributionBox 下的 slide 关节（旋钮/拨杆的 hinge 不受影响）。
-    range_max 的单位为米，行程为对称区间 [-range_max, range_max]，
-    防止按钮沿滑轴弹出；solreflimit 和 solimplimit 用于保持按钮运动范围稳定。
-    无弹簧无阻尼的按钮会补充与同类按钮一致的回弹与阻尼参数。
+    slide 关节（按压式按钮）：设置对称行程 [-range_max, range_max]（米），
+    防止按钮沿滑轴弹出；无弹簧无阻尼的按钮补充回弹与阻尼参数。
+    hinge 关节（拨杆/旋钮）：OrcaStudio 导出的 XML 缺失 range，导致无限旋转，
+    这里补上旋转限位（拨杆 0-90°，旋钮 ±180°），保持无弹性。
+    solreflimit 和 solimplimit 用于保持约束求解稳定。
     """
     if not _BUTTON_JOINT_TOKENS or range_max <= 0:
         return xml, []
@@ -157,26 +166,34 @@ def clamp_button_joints(xml: str, range_max: float = 0.005) -> tuple[str, list[s
         name = a.get("name", "")
         if not any(tok in name for tok in _BUTTON_JOINT_TOKENS):
             return m.group(0)
-        if a.get("type", "").lower() != "slide":
+        jtype = a.get("type", "").lower()
+        lname = name.lower()
+        if jtype == "slide":
+            r = next((v for tok, v in _BUTTON_RANGE_OVERRIDES.items() if tok in name), range_max)
+            a["range"] = f"{-r} {r}"
+            a["limited"] = "true"
+            try:
+                no_spring = float(a.get("stiffness", "0") or 0) == 0
+                no_damp = float(a.get("damping", "0") or 0) == 0
+            except ValueError:
+                no_spring = no_damp = False
+            if no_spring:
+                a["stiffness"] = "0.0099999998"
+            if no_damp:
+                a["damping"] = "0.0049999999"
+        elif jtype == "hinge" and "switch" in lname:
+            lo, hi = next((v for tok, v in _HINGE_RANGE_OVERRIDES.items() if tok in lname),
+                          _HINGE_RANGE_DEFAULT)
+            a["range"] = f"{lo} {hi}"
+            a["limited"] = "true"
+        else:
             return m.group(0)
-        r = next((v for tok, v in _BUTTON_RANGE_OVERRIDES.items() if tok in name), range_max)
-        a["range"] = f"{-r} {r}"
         a["solreflimit"] = "0.001 1"
         a["solimplimit"] = "0.001 0.001 0.001"
-        try:
-            no_spring = float(a.get("stiffness", "0") or 0) == 0
-            no_damp = float(a.get("damping", "0") or 0) == 0
-        except ValueError:
-            no_spring = no_damp = False
-        if no_spring:
-            a["stiffness"] = "0.0099999998"
-        if no_damp:
-            a["damping"] = "0.0049999999"
+        head = ["name", "type", "axis", "range", "limited",
+                "solreflimit", "solimplimit"]
         parts = [m.group(1)]
-        order = ["name", "type", "axis", "range", "solreflimit", "solimplimit"] + [
-            k for k in a if k not in ("name", "type", "axis", "range",
-                                      "solreflimit", "solimplimit")
-        ]
+        order = [k for k in head if k in a] + [k for k in a if k not in head]
         for k in order:
             parts.append(f' {k}="{a[k]}"')
         parts.append(m.group(3))

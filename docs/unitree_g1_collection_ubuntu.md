@@ -17,9 +17,9 @@
 
 按钮布局中保存的机器人名称如下：
 
-| 布局文件 | 布局中的机器人名称 | `--agent_name` |
-|----------|--------------------|----------------|
-| `g1_pick_buttons.json` | `g1_pick` | `g1_pick` |
+| 布局文件                 | 布局中的机器人名称 | `--agent_name` |
+| ------------------------ | ------------------ | ---------------- |
+| `g1_pick_buttons.json` | `g1_pick`        | `g1_pick`      |
 
 本文的示例命令均显式传入：
 
@@ -33,10 +33,10 @@
 
 当前 Unitree G1 采集链路使用头部和右腕两路彩色相机：
 
-| 相机位置 | 布局内相机实体 | 代码中的相机名称 | LeRobot 数据键 | Color Port |
-|----------|----------------|------------------|------------------|------------|
-| 右腕 | `camera_right` | `camera_wrist_r_color` | `cam_wrist_r` | 7080 |
-| 头部 | `head_cam` | `camera_head_color` | `cam_head` | 7090 |
+| 相机位置 | 布局内相机实体   | 代码中的相机名称         | LeRobot 数据键  | Color Port |
+| -------- | ---------------- | ------------------------ | --------------- | ---------- |
+| 右腕     | `camera_right` | `camera_wrist_r_color` | `cam_wrist_r` | 7080       |
+| 头部     | `head_cam`     | `camera_head_color`    | `cam_head`    | 7090       |
 
 以上端口同时由布局与代码确认：
 
@@ -122,40 +122,40 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_tele_lerobot.py \
 
 当前脚本的默认任务模型配置为 `--joint_strip off`，与上面的采集示例不同。因此示例中的 `--joint_strip on` 不应省略。
 
-| 参数 | 含义 | 脚本默认值 | 示例值或使用建议 |
-|------|------|------------|------------------|
-| `--task_config` | 场景任务配置文件 | `example.yaml` | 一般无需修改 |
-| `--agent_name` | OrcaLab 布局中的机器人名称 | `g1_pick` | 与按钮布局一致 |
-| `--lerobot_out` | LeRobot 数据集输出目录 | 无；采集模式必须指定 | 每个数据集使用独立目录 |
-| `--repo_id` | 写入数据集元信息的仓库名 | `local/g1_pick_osc` | 可按任务修改 |
-| `--task` | 写入数据集的语言指令 | `g1 pick osc teleoperation` | 应与实际任务和训练指令一致 |
-| `--fps` | 数据采集帧率 | `20` | 遥操作推荐 20 |
-| `--clock` | 采帧时钟：`wall` 或 `sim` | `wall` | 遥操作推荐 `wall` |
-| `--resume` | 追加到已有数据集 | 未启用 | 断点续采时追加 |
-| `--cameras` | 启用的相机，可选 `head`、`wrist_r` | `head,wrist_r` | 默认使用两路相机 |
-| `--cam_resolution` | 数据帧目标分辨率，高×宽 | `480x640` | 需要缩放时修改 |
-| `--dls_lambda` | OSC 阻尼最小二乘最大系数 | `0.23` | 示例使用 `0.2` |
-| `--joint_strip` | 任务模型配置 | `off` | 采集示例必须显式使用 `on` |
-| `--strip_col` | 任务模型的碰撞配置 | `off` | `off` 使用采集碰撞配置，`keep` 保留完整配置 |
-| `--time_step` | MuJoCo 物理步长，单位秒 | `0.001` | 与回放保持一致 |
-| `--frame_skip` | 每个控制周期的物理子步数 | `5` | 控制周期为 5 ms |
-| `--orcagym_addr` | OrcaGym 服务地址 | `localhost:50051` | 服务地址变化时修改 |
+| 参数                 | 含义                                  | 脚本默认值                    | 示例值或使用建议                                |
+| -------------------- | ------------------------------------- | ----------------------------- | ----------------------------------------------- |
+| `--task_config`    | 场景任务配置文件                      | `example.yaml`              | 一般无需修改                                    |
+| `--agent_name`     | OrcaLab 布局中的机器人名称            | `g1_pick`                   | 与按钮布局一致                                  |
+| `--lerobot_out`    | LeRobot 数据集输出目录                | 无；采集模式必须指定          | 每个数据集使用独立目录                          |
+| `--repo_id`        | 写入数据集元信息的仓库名              | `local/g1_pick_osc`         | 可按任务修改                                    |
+| `--task`           | 写入数据集的语言指令                  | `g1 pick osc teleoperation` | 应与实际任务和训练指令一致                      |
+| `--fps`            | 数据采集帧率                          | `20`                        | 遥操作推荐 20                                   |
+| `--clock`          | 采帧时钟：`wall` 或 `sim`         | `wall`                      | 遥操作推荐`wall`                              |
+| `--resume`         | 追加到已有数据集                      | 未启用                        | 断点续采时追加                                  |
+| `--cameras`        | 启用的相机，可选`head`、`wrist_r` | `head,wrist_r`              | 默认使用两路相机                                |
+| `--cam_resolution` | 数据帧目标分辨率，高×宽              | `480x640`                   | 需要缩放时修改                                  |
+| `--dls_lambda`     | OSC 阻尼最小二乘最大系数              | `0.23`                      | 示例使用`0.2`                                 |
+| `--joint_strip`    | 任务模型配置                          | `off`                       | 采集示例必须显式使用`on`                      |
+| `--strip_col`      | 任务模型的碰撞配置                    | `off`                       | `off` 使用采集碰撞配置，`keep` 保留完整配置 |
+| `--time_step`      | MuJoCo 物理步长，单位秒               | `0.001`                     | 与回放保持一致                                  |
+| `--frame_skip`     | 每个控制周期的物理子步数              | `5`                         | 控制周期为 5 ms                                 |
+| `--orcagym_addr`   | OrcaGym 服务地址                      | `localhost:50051`           | 服务地址变化时修改                              |
 
 ### 按键映射
 
 本文示例启用了 `--joint_strip on` 任务模型配置，采集操作集中在右臂和右夹爪；左侧控制不响应 Pico 输入。
 
-| 功能 | 操作 | 说明 |
-|------|------|------|
-| 右臂末端位姿 | 移动 Pico 右手柄 | 右手柄 6DOF 位姿驱动右臂 OSC |
-| 右夹爪张开 | 右手柄 A | 离散张开 |
-| 右夹爪闭合 | 右手柄 B | 离散闭合 |
-| 右夹爪连续开合 | 右扳机 | 按扳机量连续控制 |
-| 开始当前集 | 第一次按左 Grip 侧握键 | 开始后右臂才响应手柄并开始记录 |
-| 结束并保存 | 第二次按左 Grip 侧握键 | 无论任务是否成功，均保存当前集 |
-| 放弃当前集 | 单按右 Grip 侧握键 | 丢弃当前集并重置场景 |
-| 终止全部采集 | 左右 Grip 同时按下 | 丢弃未保存集，等待视频编码完成后退出 |
-| 强制中断 | 主机终端按 `Ctrl+C` | 中止采集并执行退出清理 |
+| 功能           | 操作                   | 说明                                 |
+| -------------- | ---------------------- | ------------------------------------ |
+| 右臂末端位姿   | 移动 Pico 右手柄       | 右手柄 6DOF 位姿驱动右臂 OSC         |
+| 右夹爪张开     | 右手柄 A               | 离散张开                             |
+| 右夹爪闭合     | 右手柄 B               | 离散闭合                             |
+| 右夹爪连续开合 | 右扳机                 | 按扳机量连续控制                     |
+| 开始当前集     | 第一次按左 Grip 侧握键 | 开始后右臂才响应手柄并开始记录       |
+| 结束并保存     | 第二次按左 Grip 侧握键 | 无论任务是否成功，均保存当前集       |
+| 放弃当前集     | 单按右 Grip 侧握键     | 丢弃当前集并重置场景                 |
+| 终止全部采集   | 左右 Grip 同时按下     | 丢弃未保存集，等待视频编码完成后退出 |
+| 强制中断       | 主机终端按`Ctrl+C`   | 中止采集并执行退出清理               |
 
 脚本连接到 Pico 后并不会立即驱动机器人。场景重置后必须先按一次左 Grip 进入 `RUNNING` 状态，右臂和右夹爪才会响应手柄。
 
@@ -209,11 +209,11 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
 
 当前 `my_waypoint_button/marked/` 下的路点文件由「路点标注」工具（见下文）在实际场景中标注生成，每个文件都在 YAML 顶层声明自己的 `button_name` 和 `task`：
 
-| 路点文件 | 按钮类型 | 写入的 task prompt |
-|----------|----------|--------------------|
-| `my_waypoint_press_01.yaml` | 按压式 | `按压停止按钮` |
-| `my_waypoint_rotate_01.yaml` | 旋转式 | 留空（标注时未传 `--task`），补填后才能与带 `task` 的文件同用 |
-| `my_waypoint_toggle_01.yaml` | 拨杆式 | `拨动拨杆式按钮` |
+| 路点文件                       | 按钮类型 | 写入的 task prompt                                               |
+| ------------------------------ | -------- | ---------------------------------------------------------------- |
+| `my_waypoint_press_01.yaml`  | 按压式   | `按压停止按钮`                                                 |
+| `my_waypoint_rotate_01.yaml` | 旋转式   | 留空（标注时未传`--task`），补填后才能与带 `task` 的文件同用 |
+| `my_waypoint_toggle_01.yaml` | 拨杆式   | `拨动拨杆式按钮`                                               |
 
 各按钮任务的运动结构：
 
@@ -226,24 +226,24 @@ OMP_NUM_THREADS=1 python g1_pick_osc_collection_scripted_lerobot.py \
 > [!NOTE]
 > 新场景按钮位置以标注结果为准。标注后可先用 `--dry_run` 验证轨迹；若某段偏差较大，可重新标注或手动微调该段 `r_target_b` / `r_quat_b`（旋转式还需按旋钮行程调整旋转段角度，拨杆式可按需改为向下拨动）。
 
-| 参数 | 含义 | 默认值 | 使用建议 |
-|------|------|--------|----------|
-| `--waypoint_files` | 逗号分隔的路点 YAML | `my_waypoint_button/marked/my_waypoint_press_01.yaml` | 带 `task` 的文件分别生成 episode；全部不带 `task` 时按顺序组成同一集；两种文件不能混用 |
-| `--lerobot_out` | LeRobot 数据集输出目录 | 无；非 dry-run 必须指定 | 每个数据集使用独立目录 |
-| `--repo_id` | 数据集仓库名 | `local/g1_pick_osc_scripted` | 可按任务修改 |
-| `--task` | YAML 未声明 `task` 时使用的语言指令 | `按按钮` | 必须与实际轨迹一致；带 `task` 的按钮 YAML 使用自身的 `task` |
-| `--num_episodes` | 每条轨迹重复采集的 episode 数 | `1` | 总集数为 `路点文件数 × num_episodes` |
-| `--fps` | 数据采集帧率 | `20` | 一般保持 20 |
-| `--clock` | `sim` 或 `wall` | `sim` | 脚本化采集推荐 `sim` |
-| `--resume` | 追加到已有数据集 | 未启用 | 续采时追加 |
-| `--dry_run` | 只验证轨迹，不开相机、不写数据 | 未启用 | 正式采集前建议先验证 |
-| `--speed` | 轨迹整体速度倍率 | `1.0` | `2.0` 表示各段步数减半 |
-| `--steps` | 覆盖每个路点段的步数 | `0` | `0` 表示使用 YAML 中的 `steps` |
-| `--settle_steps` | 夹爪状态变化前的沉降步数 | `200` | 等待 OSC 跟到位后再开合夹爪 |
-| `--hold_steps` | 轨迹末尾保持步数 | `100` | 给最后一次夹爪动作留出时间 |
-| `--action_repeat` | 每个轨迹采样重复的控制步数 | `1` | 增大会延长任务时间并增加收敛时间 |
-| `--track_ki` | 末端位置外环积分增益 | `0.02` | 示例设为 `0`，关闭积分补偿 |
-| `--track_clamp` | 积分补偿限幅，单位米 | `0.08` | 仅在 `track_ki > 0` 时生效 |
+| 参数                 | 含义                                 | 默认值                                                  | 使用建议                                                                                  |
+| -------------------- | ------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `--waypoint_files` | 逗号分隔的路点 YAML                  | `my_waypoint_button/marked/my_waypoint_press_01.yaml` | 带`task` 的文件分别生成 episode；全部不带 `task` 时按顺序组成同一集；两种文件不能混用 |
+| `--lerobot_out`    | LeRobot 数据集输出目录               | 无；非 dry-run 必须指定                                 | 每个数据集使用独立目录                                                                    |
+| `--repo_id`        | 数据集仓库名                         | `local/g1_pick_osc_scripted`                          | 可按任务修改                                                                              |
+| `--task`           | YAML 未声明`task` 时使用的语言指令 | `按按钮`                                              | 必须与实际轨迹一致；带`task` 的按钮 YAML 使用自身的 `task`                            |
+| `--num_episodes`   | 每条轨迹重复采集的 episode 数        | `1`                                                   | 总集数为`路点文件数 × num_episodes`                                                    |
+| `--fps`            | 数据采集帧率                         | `20`                                                  | 一般保持 20                                                                               |
+| `--clock`          | `sim` 或 `wall`                  | `sim`                                                 | 脚本化采集推荐`sim`                                                                     |
+| `--resume`         | 追加到已有数据集                     | 未启用                                                  | 续采时追加                                                                                |
+| `--dry_run`        | 只验证轨迹，不开相机、不写数据       | 未启用                                                  | 正式采集前建议先验证                                                                      |
+| `--speed`          | 轨迹整体速度倍率                     | `1.0`                                                 | `2.0` 表示各段步数减半                                                                  |
+| `--steps`          | 覆盖每个路点段的步数                 | `0`                                                   | `0` 表示使用 YAML 中的 `steps`                                                        |
+| `--settle_steps`   | 夹爪状态变化前的沉降步数             | `200`                                                 | 等待 OSC 跟到位后再开合夹爪                                                               |
+| `--hold_steps`     | 轨迹末尾保持步数                     | `100`                                                 | 给最后一次夹爪动作留出时间                                                                |
+| `--action_repeat`  | 每个轨迹采样重复的控制步数           | `1`                                                   | 增大会延长任务时间并增加收敛时间                                                          |
+| `--track_ki`       | 末端位置外环积分增益                 | `0.02`                                                | 示例设为`0`，关闭积分补偿                                                               |
+| `--track_clamp`    | 积分补偿限幅，单位米                 | `0.08`                                                | 仅在`track_ki > 0` 时生效                                                               |
 
 正式写盘前，可在脚本化命令中加入 `--dry_run`，同时省略 `--lerobot_out` 和 `--repo_id`。该模式只运行轨迹，不连接相机，也不创建数据集。
 
@@ -271,24 +271,24 @@ OMP_NUM_THREADS=1 python g1_pick_waypoint_mark.py \
     --frame_skip 5
 ```
 
-| 参数 | 含义 | 默认值 |
-|------|------|--------|
-| `--button_name` | 本次操作的按钮名称（写入路点 YAML 的 `button_name` 字段） | 必填 |
-| `--task` | 任务语言描述（写入路点 YAML 的 `task` 字段） | 留空 |
-| `--file_stem` | 输出文件名主干（建议英文，如 `press`/`rotate`/`toggle`） | 未传时使用 `--button_name` |
-| `--out_dir` | 标注结果输出目录 | `my_waypoint_button/marked` |
-| `--default_steps` | 每段写入的默认 `steps` 数 | `300` |
-| `--joint_strip` / `--strip_col` | 任务模型配置 | 与采集脚本保持一致 |
+| 参数                                | 含义                                                          | 默认值                        |
+| ----------------------------------- | ------------------------------------------------------------- | ----------------------------- |
+| `--button_name`                   | 本次操作的按钮名称（写入路点 YAML 的`button_name` 字段）    | 必填                          |
+| `--task`                          | 任务语言描述（写入路点 YAML 的`task` 字段）                 | 留空                          |
+| `--file_stem`                     | 输出文件名主干（建议英文，如`press`/`rotate`/`toggle`） | 未传时使用`--button_name`   |
+| `--out_dir`                       | 标注结果输出目录                                              | `my_waypoint_button/marked` |
+| `--default_steps`                 | 每段写入的默认`steps` 数                                    | `300`                       |
+| `--joint_strip` / `--strip_col` | 任务模型配置                                                  | 与采集脚本保持一致            |
 
 ### 操作方式
 
-| 按键 | 功能 |
-|------|------|
-| 左手柄 Grip | 开始 / 结束当前轮遥操（开始前手臂冻结） |
-| 右手柄位姿 | 遥操右臂到目标姿态 |
-| 右手柄 A / B / 扳机 | 张开 / 闭合 / 连续控制右夹爪 |
-| 左手柄 X | **记录当前点**：保存右臂末端 B 系位姿 + 当前夹爪状态 |
-| Ctrl+C | 退出 |
+| 按键                | 功能                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| 左手柄 Grip         | 开始 / 结束当前轮遥操（开始前手臂冻结）                    |
+| 右手柄位姿          | 遥操右臂到目标姿态                                         |
+| 右手柄 A / B / 扳机 | 张开 / 闭合 / 连续控制右夹爪                               |
+| 左手柄 X            | **记录当前点**：保存右臂末端 B 系位姿 + 当前夹爪状态 |
+| Ctrl+C              | 退出                                                       |
 
 ### 旋钮任务采点顺序
 
@@ -342,16 +342,16 @@ OMP_NUM_THREADS=1 python g1_pick_osc_replay_lerobot.py \
     --track_clamp 0.08
 ```
 
-| 参数 | 含义 | 默认值 | 使用建议 |
-|------|------|--------|----------|
-| `--dataset_dir` | 待回放的 LeRobot 数据集根目录 | 无，必须指定 | 目录下应存在 `data/chunk-*` |
-| `--episode` | 只回放第 N 集，编号从 1 开始 | 未指定时回放全部 | 仅查看指定回合时使用 |
-| `--loop` | 全部播完后从头循环 | 未启用 | 循环展示时追加 |
-| `--steps_per_frame` | 每个 parquet 帧重复执行的控制步数 | `10` | 20 FPS、5 ms 控制周期时与原采样周期对应 |
-| `--settle_steps` | 开播前保持初始目标的控制步数 | `10` | 初始状态不稳定时增加 |
-| `--render_every` | 每隔多少控制步渲染一次 | `5` | `0` 可关闭渲染 |
-| `--track_ki` | 回放位置积分补偿增益 | `0.0` | 默认关闭 |
-| `--track_log_every` | 每隔多少帧打印跟踪残差 | `20` | 排查轨迹偏差时调整 |
+| 参数                  | 含义                              | 默认值           | 使用建议                                |
+| --------------------- | --------------------------------- | ---------------- | --------------------------------------- |
+| `--dataset_dir`     | 待回放的 LeRobot 数据集根目录     | 无，必须指定     | 目录下应存在`data/chunk-*`            |
+| `--episode`         | 只回放第 N 集，编号从 1 开始      | 未指定时回放全部 | 仅查看指定回合时使用                    |
+| `--loop`            | 全部播完后从头循环                | 未启用           | 循环展示时追加                          |
+| `--steps_per_frame` | 每个 parquet 帧重复执行的控制步数 | `10`           | 20 FPS、5 ms 控制周期时与原采样周期对应 |
+| `--settle_steps`    | 开播前保持初始目标的控制步数      | `10`           | 初始状态不稳定时增加                    |
+| `--render_every`    | 每隔多少控制步渲染一次            | `5`            | `0` 可关闭渲染                        |
+| `--track_ki`        | 回放位置积分补偿增益              | `0.0`          | 默认关闭                                |
+| `--track_log_every` | 每隔多少帧打印跟踪残差            | `20`           | 排查轨迹偏差时调整                      |
 
 例如，只回放第 1 集时在命令末尾追加 `--episode 1`。需要循环回放时追加 `--loop`，并在主机终端按 `Ctrl+C` 退出。
 
@@ -361,16 +361,16 @@ OMP_NUM_THREADS=1 python g1_pick_osc_replay_lerobot.py \
 
 遥操作、脚本化采集和回放应使用一致的机器人名称、任务模型配置和物理步长。
 
-| 参数 | 含义 | 推荐或示例值 |
-|------|------|--------------|
-| `--dls_lambda` | DLS 最大阻尼系数；设为 0 使用原始伪逆 | 遥操作 `0.2`，脚本化/回放 `0.23` |
-| `--dls_sigma_th` | 最小奇异值触发阈值；0 表示固定阻尼 | `0.12` |
-| `--null_kp` | 零空间关节复原增益 | `10` |
-| `--kp` | 脚本化/回放的 OSC 阻抗刚度覆盖值 | `0` 表示沿用控制器配置 |
-| `--joint_strip` | 任务模型配置 | `on` |
-| `--strip_col` | 任务模型的碰撞配置 | `off` 使用采集配置，`keep` 保留完整配置 |
-| `--time_step` | MuJoCo 单个物理步长 | `0.001` 秒 |
-| `--frame_skip` | 每个控制周期执行的物理步数 | `5` |
+| 参数               | 含义                                  | 推荐或示例值                                |
+| ------------------ | ------------------------------------- | ------------------------------------------- |
+| `--dls_lambda`   | DLS 最大阻尼系数；设为 0 使用原始伪逆 | 遥操作`0.2`，脚本化/回放 `0.23`         |
+| `--dls_sigma_th` | 最小奇异值触发阈值；0 表示固定阻尼    | `0.12`                                    |
+| `--null_kp`      | 零空间关节复原增益                    | `10`                                      |
+| `--kp`           | 脚本化/回放的 OSC 阻抗刚度覆盖值      | `0` 表示沿用控制器配置                    |
+| `--joint_strip`  | 任务模型配置                          | `on`                                      |
+| `--strip_col`    | 任务模型的碰撞配置                    | `off` 使用采集配置，`keep` 保留完整配置 |
+| `--time_step`    | MuJoCo 单个物理步长                   | `0.001` 秒                                |
+| `--frame_skip`   | 每个控制周期执行的物理步数            | `5`                                       |
 
 `time_step=0.001` 且 `frame_skip=5` 时，一个控制周期为 5 ms。回放使用 `steps_per_frame=10` 时，每个 20 FPS 数据帧保持约 50 ms。
 
@@ -393,17 +393,17 @@ data_collection:
 
 ## 配置与入口文件
 
-| 文件 | 说明 |
-|------|------|
-| `src/examples/dataCollection/unitree_g1/example.yaml` | 场景和数据采集配置 |
-| `src/examples/dataCollection/unitree_g1/g1_pick_buttons.json` | 按钮场景；显式配置头部 7090、右腕 7080 |
-| `src/examples/dataCollection/unitree_g1/g1_pick_osc_collection_tele_lerobot.py` | Pico 遥操作和 LeRobot 数据采集 |
-| `src/examples/dataCollection/unitree_g1/g1_pick_osc_collection_scripted_lerobot.py` | 路点插值与脚本化数据采集 |
-| `src/examples/dataCollection/unitree_g1/g1_pick_waypoint_mark.py` | 关键路点标注工具 |
-| `src/examples/dataCollection/unitree_g1/g1_pick_osc_replay_lerobot.py` | LeRobot parquet 数据回放 |
-| `src/examples/dataCollection/unitree_g1/my_waypoint_button/marked/*.yaml` | 路点标注生成的按钮任务路点 |
-| `src/dataStorage/lerobot_camera.py` | 相机名称、端口和 WebSocket 连接实现 |
-| `src/dataStorage/g1_pick_osc_data_storage.py` | Unitree G1 的 18 维 state/action 定义 |
+| 文件                                                                                  | 说明                                   |
+| ------------------------------------------------------------------------------------- | -------------------------------------- |
+| `src/examples/dataCollection/unitree_g1/example.yaml`                               | 场景和数据采集配置                     |
+| `src/examples/dataCollection/unitree_g1/g1_pick_buttons.json`                       | 按钮场景；显式配置头部 7090、右腕 7080 |
+| `src/examples/dataCollection/unitree_g1/g1_pick_osc_collection_tele_lerobot.py`     | Pico 遥操作和 LeRobot 数据采集         |
+| `src/examples/dataCollection/unitree_g1/g1_pick_osc_collection_scripted_lerobot.py` | 路点插值与脚本化数据采集               |
+| `src/examples/dataCollection/unitree_g1/g1_pick_waypoint_mark.py`                   | 关键路点标注工具                       |
+| `src/examples/dataCollection/unitree_g1/g1_pick_osc_replay_lerobot.py`              | LeRobot parquet 数据回放               |
+| `src/examples/dataCollection/unitree_g1/my_waypoint_button/marked/*.yaml`           | 路点标注生成的按钮任务路点             |
+| `src/dataStorage/lerobot_camera.py`                                                 | 相机名称、端口和 WebSocket 连接实现    |
+| `src/dataStorage/g1_pick_osc_data_storage.py`                                       | Unitree G1 的 18 维 state/action 定义  |
 
 入口会根据命令行参数加载相应的任务模型配置，无需单独运行辅助模块。
 
