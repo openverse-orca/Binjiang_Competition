@@ -122,7 +122,9 @@ adb devices
 
 完成环境安装和资产订阅后，按以下顺序运行任务：
 
-1. 根据目标平台选择[宇树 G1 数据采集](docs/unitree_g1_collection.md)。
+1. 根据目标平台选择[宇树 G1 数据采集]:
+   - [Ubuntu](docs/unitree_g1_collection_ubuntu.md)
+   - [Windows](docs/unitree_g1_collection_windows.md)
 2. 在 OrcaLab 中打开比赛场景 `Binjiang_Competition_2026`。
 3. 在 OrcaLab 中加载平台文档指定的任务布局（宇树 G1 按钮任务为 `g1_pick_buttons.json`）。
 4. 按平台文档检查相机配置；使用 Pico 遥操作时，同时完成设备连接和端口映射。
