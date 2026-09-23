@@ -51,16 +51,17 @@ python scripts/verify_environment.py
 
 ### Windows 11
 
-Windows 下使用 CMD 配置运行环境。当前仓库中的 `requirements.txt` 为 Linux x86-64 锁定环境，Windows 请使用 `requirements.in` 与 `constraints.txt` 安装运行依赖。
+Windows 下使用 CMD 配置运行环境：
 
 ```cmd
-conda create -n orcalab_lerobot python=3.12.13 pip=26.0.1 -y
+conda create -n orcalab_lerobot python=3.12
 conda activate orcalab_lerobot
-conda install -c conda-forge numpy=2.2.6 scipy=1.16.2 -y
 
-python -m pip install -r requirements.in -c constraints.txt
-python -m pip install "orca-gym==26.8.2" "orca-lab==26.8.2"
-python -m pip install --no-deps --no-build-isolation .\third_party\lerobot .\third_party\televuer .\third_party\openpi-client
+pip install --no-deps -r requirements.txt
+pip install "orca-lab==26.8.2"
+pip install --no-deps --no-build-isolation ./third_party/lerobot
+pip install --no-deps --no-build-isolation ./third_party/televuer
+pip install --no-deps --no-build-isolation ./third_party/openpi-client
 ```
 
 安装完成后启动 OrcaLab：
