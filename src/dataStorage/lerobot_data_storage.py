@@ -515,13 +515,33 @@ class LeRobotDatasetWriter:
                 f"state_dim={state_dim} 与 len(state_names)={len(state_names)} 不一致"
             )
 
-        if resume and Path(root).exists():
-            dataset = LeRobotDataset(
-                repo_id=repo_id,
-                root=root,
-                download_videos=False,
-                tolerance_s=0.0001,
-            )
+        root_path = Path(root)
+        has_meta = (root_path / "meta" / "info.json").is_file()
+        has_eps = (root_path / "meta" / "episodes.jsonl").is_file()
+        resuming = resume and has_meta and has_eps
+        if resume and root_path.exists() and not resuming:
+            if has_meta and not has_eps:
+                _log.warning(
+                    f"[resume] {root} 中数据集未保存过任何 episode，按新建处理"
+                )
+            else:
+                _log.warning(
+                    f"[resume] {root} 目录中缺少有效数据集（meta/info.json），按新建处理"
+                )
+
+        if resuming:
+            try:
+                dataset = LeRobotDataset(
+                    repo_id=repo_id,
+                    root=root,
+                    download_videos=False,
+                    tolerance_s=0.0001,
+                )
+            except Exception as e:
+                raise ValueError(
+                    f"[resume] 加载已有数据集失败（{root}）：{e}。"
+                    "数据集可能损坏；请更换 --lerobot_out，或手动确认后删除该目录重采。"
+                ) from e
             # Resume only when stored feature names match the requested schema.
             def _flat_names(raw) -> list[str]:
                 if raw is None:
@@ -546,7 +566,20 @@ class LeRobotDatasetWriter:
                 f"[resume] 已加载 {dataset.num_episodes} 集 / {dataset.num_frames} 帧"
             )
         else:
-            if Path(root).exists() and not resume:
+            if root_path.exists():
+                if not resume:
+                    try:
+                        n_old = sum(
+                            1 for _ in open(root_path / "meta" / "episodes.jsonl")
+                        )
+                    except OSError:
+                        n_old = 0
+                    _log.warning(
+                        f"[LeRobot] 输出目录已存在（{n_old} 集）：{root}。"
+                        "未启用 --resume，旧数据将被删除并重建！"
+                    )
+                # LeRobotDatasetMetadata.create 使用 mkdir(exist_ok=False)，
+                # 已存在的目录必须先删除（resume 且无效时上面已警告"按新建处理"）。
                 shutil.rmtree(root)
 
             features: dict = {
